@@ -1,11 +1,13 @@
 \documentclass[../thesis.tex]{subfiles}
 
 \begin{document}
+\section{Introduction}
+Now armed with an understanding of the biological context of \textbf{genomic instability} in cancer, we will describe the statistical workflow underlying the following chapters. We will be concerned with a) designing models to encapsulate the signatures of genomic instability; b) understanding how these patterns of mutation interact with tumours' development in the context of \gls{icb} therapy; and c) developing practicable tests to stratify patients according to likelihood of response. This last goal, that the methods we produce must be implementable, will provide a further set of restrictions refining the scope of our efforts. In particular, we will focus on methods to maximise the informative content of targeted sequencing-based tests while minimising their cost, by identifying concise regions of genomic space that act as effective \textbf{predictors} of the genomic landscape of a tumour. Furthermore, while we incorporate other data types (such as transcriptomics data) into our models in order to understand the \textbf{consequences} of genomic instability, all resulting tests will be based purely on targeted sequencing of DNA, meaning that the predictive biomarkers we develop will be applicable to liquid biopsy technology. Finally, the philosophy behind our work will be to approach modelling the genome globally rather than locally: we will spend relatively little time discussing individual genes or loci, instead attempting to understand genome/exome-wide patterns of mutation.
 
-We now describe a workflow that will be a common theme throughout the rest of this work. Namely, we will \textit{i)} identify a biomarker of interest; \textit{ii)} fit a statistical model to the distribution of mutations 
+We begin by representing the profile of a tumour exome with a random vector $M$ taking values in some domain $\mathcal{X}$. The precise format of this vector, and of the space $\mathcal{X}$ is not important here and will be chosen to reflect the structures we wish to model at any given point in time. The distribution of $M$ will be given by a density function $p_M(\mathbf{m})$. This distribution will be extraordinary complex, and we will not in general have access to it. Instead, we will propose a parameterised family $\mathcal{P}$ of \emph{generative models}, and from this family choose a best model $\bar{p}(\mathbf{m})$. We then define a \emph{biomarker of interest} as a function $f: \mathcal{X} \rightarrow \mathbb{R}$. 
+
 
 \section{Generative models of mutation}
-
 
 \subsection{The nature of generative models}
 Generative models attempt to capture the underlying distribution of complex data in a manner that allows new samples to be drawn from the same distribution efficiently. They come in a variety of classes and have been a particular focus of research in the machine learning community in the last decade, being utilised for data compression, representation learning, and as a means to generate new samples from complex distributions. Generative models have found particular application in  in disciplines dealing with extremely high-dimensional, complex data distributions, including image analysis and natural language processing as well as, more recently, genomics. Generative models often (but not always) attempt to learn some lower-dimensional latent representation of their high-dimensional inputs, and as such are related to the theory of dimensionality reduction, and of unsupervised learning in general. 
@@ -13,6 +15,10 @@ Generative models attempt to capture the underlying distribution of complex data
 
 
 \subsection{Strategies for fitting generative models}
+\textbf{Maximum Likelihood Estimation (Invertible Models)} \\
+\textbf{\gls{mcmc} Methods} \\
+\textbf{Variational Inference} \\
+\citep{blei_variational_2017}
 
 
 \subsection{Discrete, high-dimensional, sparse and bursty: the challenges of mutation data}
@@ -20,10 +26,16 @@ Generative models attempt to capture the underlying distribution of complex data
 \citep{zhao_variational_2020}
 
 \subsection{Previous work in generative models of genome-wide mutation}
-\citep{budczies_cutoff_2012} \citep{yao_ectmb_2020} \citep{fantini_mutsignatures_2020}
+\textbf{Uniform Rates} \\
+\citep{budczies_optimizing_2019}  \\
+\textbf{Variable Rates} \\
+\citep{yao_ectmb_2020} \\
+\textbf{Latent Variables: Random Matrix Factorisation} \\
+\citep{fantini_mutsignatures_2020}
+
+\subsection{A dash of impropriety: non-generative models}
 
 \section{Learning from learning: biomarker prediction}
-\section{The double role of regularisation}
 This section consists, in part, of discussion adapted from 'Dimensionality and Structure in Cancer Genomics: A Statistical Learning Perspective' \citep{bradley_dimensionality_2020}. This was published as the third chapter of the book 'Artificial Intelligence in Oncology Drug Discovery and Development' \citep{cassidy_artificial_2020}.
 
 \dobib % renders bibliography (only when compiling for chapter only)
