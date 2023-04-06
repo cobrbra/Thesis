@@ -1,0 +1,62 @@
+\documentclass[../thesis.tex]{subfiles}
+
+\begin{document}
+\section{Introduction}
+Now armed with an understanding of the biological context of \textbf{genomic instability} in cancer, we will describe the statistical workflow underlying the following chapters. We will be concerned with a) designing models to encapsulate the signatures of genomic instability; b) understanding how these patterns of mutation interact with tumours' development in the context of \gls{icb} therapy; and c) developing practicable tests to stratify patients according to likelihood of response. This last goal, that the methods we produce must be implementable, will provide a further set of restrictions refining the scope of our efforts. In particular, we will focus on methods to maximise the informative content of targeted sequencing-based tests while minimising their cost, by identifying concise regions of genomic space that act as effective \textbf{predictors} of the genomic landscape of a tumour. Furthermore, while we incorporate other data types (such as transcriptomics data) into our models in order to understand the \textbf{consequences} of genomic instability, all resulting tests will be based purely on targeted sequencing of DNA, meaning that the predictive biomarkers we develop will be applicable to liquid biopsy technology. Finally, the philosophy behind our work will be to approach modelling the genome globally rather than locally: we will spend relatively little time discussing individual genes or loci, instead attempting to understand genome/exome-wide patterns of mutation.
+
+We begin by representing the profile of a tumour exome with a random vector $M$ taking values in some domain $\mathcal{X}$. The precise format of this vector, and of the space $\mathcal{X}$ is not important here and will be chosen to reflect the structures we wish to model at any given point in time. The distribution of $M$ will be given by a density function belonging to a parameterised family $\mathcal{P}$ of \emph{generative models}. We'll refer to an arbitrary member of $\mathcal{P}$ as $p_M(\mathbf{m} | \theta)$ for parameters $\theta$, and to the true distribution as $p^*_M(\mathbf{m}|\theta^*)$. We then define a \emph{biomarker of interest} as a known function $f: \mathcal{X} \rightarrow \mathbb{R}$. Our aim will be to predict $f(M)$ from observations of a small number of the covariates of $M$. We will choose which covariates to observe according to a cost function, specifying the penalty associated with observing each covariate.
+
+
+\section{Generative models of mutation}
+
+\subsection{The nature of generative models}
+Generative models attempt to capture the underlying distribution of complex data in a manner that allows new samples to be drawn from the same distribution efficiently. They come in a variety of classes and have been a particular focus of research in the machine learning community in the last decade, being utilised for data compression, representation learning, and as a means to generate new samples from complex distributions. Generative models have found particular application in  in disciplines dealing with extremely high-dimensional, complex data distributions, including image analysis and natural language processing as well as, more recently, genomics. Generative models often (but not always) attempt to learn some lower-dimensional latent representation of their high-dimensional inputs, and as such are related to the theory of dimensionality reduction, and of unsupervised learning in general. 
+
+
+
+\subsection{Strategies for fitting generative models}
+\textbf{Maximum Likelihood Estimation (Invertible Models)} \\
+\textbf{\gls{mcmc} Methods} \\
+\textbf{Variational Inference} \\
+\citep{blei_variational_2017}
+
+
+\subsection{Discrete, high-dimensional, sparse and bursty: the challenges of mutation data}
+High-dimensional, sparse data: probabilistic matrix factorisation \citep{salakhutdinov_probabilistic_2007}. \\
+
+\citep{zhao_variational_2020}
+
+\subsection{Previous work in generative models of genome-wide mutation}
+\textbf{Uniform Rates} \\
+\citep{budczies_optimizing_2019}  \\
+\textbf{Variable Rates} \\
+\citep{yao_ectmb_2020} \\
+\textbf{Latent Variables: Random Matrix Factorisation} \\
+\citep{fantini_mutsignatures_2020} \\
+\textbf{Latent Variables: Dirichlet Allocation} \\
+\citep{matsutani_discovering_2019} \\
+\textbf{Sparse Signatures}: \\
+\citep{lal_novo_2021}
+
+\subsection{A dash of impropriety: non-generative models}
+
+\section{Learning from learning: biomarker prediction}
+This section consists, in part, of discussion adapted from 'Dimensionality and Structure in Cancer Genomics: A Statistical Learning Perspective' \citep{bradley_dimensionality_2020}. This was published as the third chapter of the book 'Artificial Intelligence in Oncology Drug Discovery and Development' \citep{cassidy_artificial_2020}.
+
+Let X be a random variable taking values on a domain $\mathcal{X} \subset \mathbb{R}^p$. We assume that the distribution of $X$ lies within a specified family $\mathcal{P}$ of generative models, parameterised by a vector $\theta$. We write the density function for $X$ as $p^*(\mathbf{x}) = p(\mathbf{x} | \theta^*)$, and assume we have a means of fitting an estimate $\hat{\theta}$. Furthermore, we have a known target function $t: \mathcal{X} \rightarrow \mathbb{R}$, and a cost function $c: 2^{\{1, \dots, p\}} \rightarrow \mathbb{R}$.  \\
+~\\
+\textbf{Problem Statement:} Fit a function $\hat{f}$, depending only on a set of covariates $J \subset \{1, \ldots, p\}$ such that $c(J) \leq C$. \\
+~\\
+\textbf{Approach:} We choose a loss function $\mathcal{L}: \mathbb{R}^2 \rightarrow \mathbb{R}$, and a family of functions $\mathcal{F}$ parameterised by a vector $\beta$, where the function $f_\beta: \mathbb{R}^p \rightarrow \mathbb{R}$ denote a typical member of $\mathcal{F}$. Define $c(\beta)$ as the appropriate cost for $f_{\beta}$. We clearly want to solve:
+
+\[\argmin_{\beta: c(\beta) \leq C} \bigg\{ \mathbb{E}_{p(\mathbf{x}|\hat{\theta})} \Big[\mathcal{L}(t(X), f_{\beta}(X)) \Big] \bigg\} \]
+
+
+
+
+
+
+\dobib % renders bibliography (only when compiling for chapter)
+
+
+\end{document}

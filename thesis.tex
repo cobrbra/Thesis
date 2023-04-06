@@ -1,42 +1,84 @@
 % Document-defining preamble
-\documentclass[10pt,twoside,openright]{report} 
+\documentclass[12pt,twoside,openright]{report} 
 \usepackage[phd]{edmaths}
 
 % Title page meta-data 
-\title{Predictors and Consequences of Genomic Instability in Cancer}
+\title{Statistical Learning Approaches to Genomic Medicine}
 \author{Jacob R. Bradley}
 \date{2023}
 
 % Sections
-\renewcommand{\thesection}{\arabic{section}} % removes chapter numbers
+%\renewcommand{\thesection}{\arabic{section}} % removes chapter numbers
 
 % Glossary
-\usepackage[acronym, toc]{glossaries}
-\usepackage[colorlinks,linkcolor=black,citecolor=blue,urlcolor=blue,breaklinks = true]{hyperref} %makes glossary elements black
+\usepackage[acronym, toc]{glossaries-extra} % LINDEN DON'TUNCOMMENT
+\usepackage[
+% draft, 
+colorlinks,linkcolor=black,citecolor=blue,urlcolor=blue,breaklinks = true
+]{hyperref} %makes glossary elements black
 
 \makeglossaries 
+\newacronym{roc}{ROC}{receiver operating characteristic}
 \newacronym{tcga}{TCGA}{The Cancer Genome Atlas}
-\newacronym{pv}{PV}{Polycythemia Vera}
-\newacronym{tmb}{TMB}{Tumour Mutation Burden}
-\newacronym{icb}{ICB}{Immune Checkpoint Blockade}
-\newacronym{ici}{ICI}{Immune Checkpoint Inhibitor}
-\newacronym{msi}{MSI}{Micro-Satellite Instability}
-\newacronym{lasso}{LASSO}{Least Absolute Shrinkage and Selection Operator}
-\newacronym{tib}{TIB}{Tumour Indel Burden}
-\newacronym{ctla4}{CTLA-4}{Cytotoxic T Lymphocyte Associated protein 4}
-\newacronym{pdl1}{PD-L1}{Programmed Death Ligand 1}
-\newacronym{wes}{WES}{Whole Exome Sequencing}
-\newacronym{ctdna}{ctDNA}{Circulating Tumour DNA}
-\newacronym{bmr}{BMR}{Background Mutation Rate}
-\newacronym{nsclc}{NSCLC}{Non-Small Cell Lung Cancer}
-\newacronym{auprc}{AUPRC}{Area Under Precision-Recall Curve}
-\newacronym{ectmb}{ecTMB}{Estimation and Classification of Tumour Mutation Burden}
-\newacronym{mcmc}{MCMC}{Monte-Carlo Markov Chain}
-\newacronym{dna}{DNA}{Deoxyribonucleic Acic}
+\newacronym{pv}{PV}{polycythemia vera}
+\newacronym{tmb}{TMB}{tumour mutation Burden}
+\newacronym{icb}{ICB}{immune checkpoint blockade}
+\newacronym{ici}{ICI}{immune checkpoint inhibitor}
+\newacronym{msi}{MSI}{micro-satellite instability}
+\newacronym{lasso}{LASSO}{least absolute shrinkage and selection pperator}
+\newacronym{tib}{TIB}{tumour indel burden}
+\newacronym{ctla4}{CTLA-4}{cytotoxic T-lymphocyte associated protein 4}
+\newacronym{pdl1}{PD-L1}{programmed death ligand 1}
+\newacronym{wes}{WES}{whole exome sequencing}
+\newacronym{ctdna}{ctDNA}{circulating tumour DNA}
+\newacronym{bmr}{BMR}{background mutation rate}
+\newacronym{nsclc}{NSCLC}{non-small cell lung cancer}
+\newacronym{auprc}{AUPRC}{area under precision-recall Curve}
+\newacronym{ectmb}{ecTMB}{estimation and classification of tumour mutation burden}
+\newacronym{mcmc}{MCMC}{Markov chain Monte Carlo}
+\newacronym{dna}{DNA}{deoxyribonucleic acic}
+\newacronym{qrtlamp}{qRT-LAMP}{quantitative reverse-transcription loop-mediated isothermal amplification}
+\newacronym{lamp}{LAMP}{Loop-mediated isothermal amplification}
+\newacronym{qpcr}{qPCR}{quantitative polymerase chain reaction}
+\newacronym{pcr}{PCR}{polymerase chain reaction}
+\newacronym{mrna}{mRNA}{messenger ribonucleic acid}
+\newacronym{tt}{Tt}{time-to-threshold}
+\newacronym{ns}{NS}{NanoString}
+\newacronym{fip}{FIP}{forward inner primer}
+\newacronym{bip}{BIP}{backward inner primer}
+\newacronym{f3}{F3}{forward outer primer}
+\newacronym{b3}{B3}{backward outer primer}
+\newacronym{lf}{LF}{loop forward}
+\newacronym{lb}{LB}{loop backward}
+\newacronym{tm}{Tm}{melting temperature}
+\newacronym{loopsis}{LOO-PSIS}{leave-one-out Pareto smoothed importance sampling}
+\newacronym{ivt}{IVT}{\emph{in vitro}-transcribed}
+\newacronym{hmc}{HMC}{Hamiltonian Monte Carlo}
+\newacronym{wgs}{WGS}{whole-genome sequencing}
+\newacronym{ipw}{IPW}{inverse-probability weighting}
+\newacronym{cate}{CATE}{conditional average treatment effect}
+
+% \newglossaryentry{latex}
+% {
+%     name=latex,
+%     description={Is a markup language specially $\lambda$ suited 
+%     for scientific documents}
+% } % LINDEN UNCOMMENT
+
+% \newglossaryentry{lambda}
+% {
+%     name=\lambda,
+%     description={Is a markup language specially $\lambda$ suited 
+%     for scientific documents}
+% } % LINDEN UNCOMMENT
 
 % Typesetting
-\usepackage{multirow,latexsym,amsmath,amssymb,amsfonts,amsthm,bbm,mathrsfs,breakcites,dsfont,xcolor, enumerate, url}
+\usepackage{multirow,latexsym,amsmath,amssymb,amsfonts,amsthm,bbm,mathrsfs,breakcites,dsfont,xcolor, enumerate, url, bm}
 
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{technique}{Technique}[section]
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
 \newcommand{\var}{\mathrm{Var}}
@@ -52,20 +94,22 @@
 % Figures 
 \usepackage{graphicx}
 \graphicspath{{figures/}{../figures/}}
+\usepackage{tikz-cd}
+\usepackage[ruled,vlined]{algorithm2e}
+
 
 % Bibliography 
 \usepackage{natbib}
-\bibliographystyle{abbrvnat}
+\usepackage{subfiles} % Manages subfiles
 \setcitestyle{authoryear, open={(},close={)}}
 
-\newcommand{\dobib}{
-    \bibliography{../../references.bib} % Renders bibliographies when in single chapter view.
+\def\dobib{
+    \bibliographystyle{natbib}
+    \bibliography{references.bib} % Renders bibliographies when in single chapter view.
 }
 
-\usepackage{subfiles} % Manages subfiles
-
 \begin{document}
-\renewcommand{\dobib}{} % Disable chapter-specific bibliographies
+\def\dobib{} % Disable chapter-specific bibliographies
 
 \maketitle
 
@@ -81,6 +125,7 @@
 
 \subfile{chapters/laysummary}
 
+% \printglossary % LINDEN UNCOMMENT
 \printglossary[type=\acronymtype]
 
 \tableofcontents
@@ -90,24 +135,22 @@
 \subfile{chapters/chapter1}
 
 
-\chapter{The Generative/Predictive Blueprint for Biomarker Estimation \label{chap:genmodels}}
+\chapter{Hierarchical Bayesian modeling identifies key considerations in the
+development of quantitative loop-mediated isothermal amplification
+assays \label{chap:lamp_modelling}}
 
 \subfile{chapters/chapter2}
 
-\chapter{Tumour Mutation Burden and Tumour Indel Burden}
+\chapter{Data-driven design of targeted gene panels for estimating immunotherapy biomarkers \label{chap:tmb_estimation}}
 
 \subfile{chapters/chapter3}
 
-\chapter{Causative Mechanisms of Genomic Instability}
+\chapter{Causal prediction of survival after immunotherapy with genomic signatures \label{chap:causal_genomics}}
 
 \subfile{chapters/chapter4}
 
-\chapter{Transcripts as Neoantigen Proxies: Expressed Mutation Burden}
-
-\subfile{chapters/chapter5}
-
-
 \addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{natbib}
 \bibliography{references.bib}
 
 \appendix

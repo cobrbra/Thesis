@@ -2,8 +2,174 @@
 
 \begin{document}
 
-This chapter might be something to do with inferring causal pathways from learned generative models.
+\section{Survival analysis}
 
+\subsection{Survival times}
+
+Survival analysis concerns modelling the amount of time elapsing before a given event occurs. In medical settings, this is often time-to-death analysis, but can also deal with other events, both medical (e.g. relapse or visit to hospital) and non-medical (machine lifetime, customer churn, etc.). We will refer here to the generic `event' as death (since this is our main application case), generic `samples' as patients, and time-to-event measures as survival times. For a patient $i$, we will typically refer to survival times with either a lower case $t_i$ (for observations) or upper case $T_i$ (for random variables). We note the following properties we might expect from survival times, both of which influence decisions around modelling:
+\begin{enumerate}
+    \item `Survival times are continuous' ($t_i \in \mathbb{R}$). This is intuitively true in many situations, but we often only have access to discrete bins (e.g. months). This can lead to modelling complexities such as the presence of exact ties between observations.
+    \item `Survival times are positive' ($t_i > 0$). This introduces another important notion: that survival times are \emph{relative} to some other point in time. The definition of this point in time can be important and varied between (and sometimes within) studies.
+\end{enumerate}
+Point two above emphasises the importance of appropriate definition of starting time for interpreting survival times. Of perhaps even greater subtlety can be the definition of end time. In the cases we're addressing, this tends to be patient death (often referred to as overall survival (OS)). However, we are often implicitly interested in analysing the likelihood of dying from one particular factor (e.g. lung cancer). In many studies, death from other causes (which, complexifying matters further, may be related non-trivially to the factor under study, e.g. dying from cardiac arrest while suffering lung failure) is counted identically to death from the cause of interest. In others, patients who die for other reasons may be excluded from the study. Both approaches have issues, but the latter case is an example of a more ubiqituous phenomenon in survival studies (at least those pertaining to human patients): \emph{censoring}.
+
+\subsection{Censoring}
+In the previous section, we discussed a particular (in fact, quite complex and nuanced), form of censoring, but other forms are more clear cut. Censoring in general refers to any consideration that means that we do not get to observe the patient until they die of the cause of interest. We therefore might think of the example above as `censoring by death from other cause'. Here are two further types of censoring:
+
+\begin{enumerate}
+    \item `Censoring by continued survival'. This form of censoring is universal to human survival studies. In short: we cannot wait for everyone in a study to die, and we certainly can't force them to! At some point the study ends, and some participants may remain alive. We know (or suspect) that given enough time they would eventually die from the cause of interest, but all we know is that they survived at least as long as they had survived at the end of the study.
+    \item `Censoring by terminated participation'. This, broadly speaking, covers everything else. There are a variety of reasons patients may have to be removed from the cohort under observation during the progress of a study. These include medical non-compliance (e.g. refusing to take the treatment assigned to them), loss of follow-up (e.g. not responding to monthly requests for information), or reassignment due to some other protocol (e.g. being switched arms on a clinical trial for ethical reasons if it appears another treatment is clearly more beneficial).
+\end{enumerate}
+
+To address censoring, we use the following notation. For a patient $i$, we let $c_i \in \mathbb{R}^{+}$ (or $C_i$ for a random variable) denote the time at which the patient is removed from further observation. We therefore observe only the following: $y_i \in \mathbb{R}^{+}$ (or $Y_i$ for random variable) is the time of final follow-up, i.e. $y_i = \min(c_i, t_i)$; and $\delta_i$ (or $\Delta_i$) for censorship status, i.e. $\delta_i = \mathbbm{1}\{t_i \leq c_i\}$. 
+
+The core question for statistical modelling of survival is, therefore, how to make inferences about the behaviour of the random variables $T_i$ from observation only of a given set of $n$ pairs $\{(y_i, \delta_i)\}_{i=1}^{n}$. In general we assume these tuples of observations (and potential future observations) to be realisations of independent and identically distributed random variables, and so refer to this underlying joint distribution without reference to sample $i$, i.e. we consider ($T, C, \Delta)$.  We discuss in the next section some common practices for performing inference on these targets.
+   
+\subsection{Modelling approaches}
+We've now defined and introduced notation for the targets of inference in a survival modelling setting. In this section we'll describe some common approaches for performing this modelling, and in particular for modelling survival conditional on a further random vector of features $X$. 
+
+We begin by defining \textit{hazard}. While it is possible to characterise the distribution of survival times $T$ in a variety of ways, hazard is common as it is both interpretable and easy to work with. For the distribution $T$, we define hazard $h(t)$ as a function of time $t$ as the instantaneous rate of death at time $t$, given survival up until time $t$, via:
+\[
+    h(t) := \lim_{\delta t \rightarrow 0} \frac{\mathbb{P}(T \in [t, t + \delta t] | T > t)}{\delta t}.
+\]
+We also define the \textit{survival} function $S(t)$ as $\mathbb{P}(T > t)$. We may then observe that hazard is expressible as 
+\begin{align*}
+    h(t) & = \lim_{\delta t \rightarrow 0} \frac{\mathbb{P}(T > t) - \mathbb{P}(T > t + \delta t)}{\mathbb{P}(T > t) \delta t} \\
+    & = \frac{1}{S(t)} \lim_{\delta \rightarrow 0} \frac{S(t) - S(t + \delta t)}{\delta t}\\
+    & = - \frac{1}{S(t)} \frac{d}{dt} S(t)\\
+    & = - \frac{d}{dt} \log S(t). 
+\end{align*}
+Finally note that $\frac{dS}{dt} = - f(t)$, where $f(t)$ is the probability density function for $T$, so we may also write $h(t) = \frac{f(t)}{S(t)}$. This is consistent with the intuition that hazard denotes rate of death, scaled by likelihood of survival so far. Often when fitting predictive models, we use hazard as the target of prediction given inputs $x$, aiming to estimate $h(t|x)$. Before we move on to this case, however, we'll discuss a few more properties of hazard. It can be useful to define the cumulative hazard function $H(t) = \int_{0}^{t}h(u)du$. We can then write down further useful relations between hazard, cumulative hazard, and density. Firstly note that 
+\begin{align*}
+H(t) & := \int_{0}^{t}h(u)du \\
+& = -\int_{0}^{t}\frac{d}{du} \big(\log S(u)\big) du  \\
+& = - \big[\log S(u) \big]_{0}^{t} \\
+& = -\log S(t),
+\end{align*}
+so we can also express $H(t)$ in terms of the survival function. Likewise we can express $f(t)$ simply in terms of hazard via
+\[ f(t) = h(t)S(t) = h(t)\exp (-H(t)).\]
+From this last relationship we can quickly see that under an assumption of \emph{constant hazard} $h(t)=\lambda$, survival times will follow an exponential distribution, with density function $f(t) = \lambda \exp(-\lambda t)$, with mean $\lambda^{-1}$ and variance $\lambda^{-2}$.
+
+However, as mentioned above, a single model for all survival times is not sufficient for most purposes. In general we want to learn about the effect of some covariates on survival time. We therefore introduce a random (potentially vector-valued) variable $X$ taking values in $\mathbb{R}^p$, and define the following conditional versions of survival and hazard functions:
+\begin{align*}
+    h(t|x) & := \lim_{\delta t \rightarrow 0} \frac{\mathbb{P}(T \in [t, t + \delta t] | T > t, X = x)}{\delta t} \\
+    S(t|x) & := \mathbb{P}(T > t | X = x).
+\end{align*}
+Note that the same relationships as above hold. When making decisions around modelling, assumptions about the behaviour of these two functions are typically the starting point. We'll here evaluate two common assumptions, based on restricting the functional form of each of these two functions respectively.
+
+\subsubsection{The proportional hazards assumption}
+Proportional hazards models are based on the assumption that changes in a given covariate have the effect of increasing hazard by a constant factor across all time points. We state this formally as follows: that there exist functions $h_0: \mathbb{R}^+ \rightarrow \mathbb{R}^+$ and $\theta: \mathbb{R}^p \rightarrow \mathbb{R}^+$ such that 
+\[h(t|x) = h_0(t) \theta(x). \]
+In practice the function $\theta$ is often chosen to be $\theta(x) = \exp (- \beta^T x)$ for parameter $\beta \in \mathbb{R}^p$ to be fitted. In this case $h_0(t)$ is left to be fitted flexibly (although this is not necessary for inferring $\beta$, making the resulting model (the Cox model; \citealp{cox_regression_1972}) semi-parameteric. Note that we can derive the resultant form of the survival function as $S(t|x) = S_0(t)^{\theta(x)}$, where $S_0(t) = \exp(-\int_{0}^{t}h_0(u)du)$.
+
+
+\subsubsection{The accelerated failure time assumption}
+Accelerated failure time models \citep{wei_accelerated_1992} are based on the assumption that changes in a given covariate have the effect of scaling the entire lifetime of a patient by a constant factor. This is formalised by position that there exist functions $S_0: \mathbb{R}^+ \rightarrow [0,1]$ and $\theta: \mathbb{R}^p \rightarrow \mathbb{R}^+$ such that 
+\[S(t|x) = S_0(\theta(x)t).\]
+As for proportional hazards, the function $\theta$ is often chosen to be $\theta(x) = \exp (-\beta^T x)$. Again as above, we may use this restriction to infer the form of the hazard function as $\theta(x)h_0(\theta(x)t)$, where $h_0(t) = -\frac{d}{dt} \log S_0(t)$. The function $S_0(t)$ is often chosen to be the exponential survival function $e^{-t}$.
+
+Note that the proportional hazards and accelerated failure time assumptions are not mutually exclusive. Consider for example the following setting: $T$ is Weibull distributed with parameters $\lambda, k$, i.e. has cumulative distribution function $1- \exp((t/\lambda)^k$. Now suppose that the parameter $\lambda$ is given by $\lambda = \lambda_0 \exp(\beta^T x)$. We then have that 
+\[S(t|x) = \exp\big(-t^k\lambda_0^{-k}\exp( -\beta^Tx)\big), \]
+which satisfies the correct form for the accelerated failure time assumption with $S_0(t) = \exp(-t^k)$ and $\theta(x) = \lambda_0^{-k}\exp(\beta^Tx)$. We can also show that the hazard is given by 
+\[h(t|x) = kt^{k-1}\lambda_0^{-k} \exp(-k\beta^Tx), \]
+satisfying the proportional hazards assumption with $h_0(t) = k\lambda_0^{-k}t^{k-1}$ and $\theta(x) = \exp(-k\beta^Tx)$. 
+
+\subsection{Fitting survival models}
+
+\section{Heterogeneous treatment effect}
+Heterogeneous treatment effects refer to interactions between the effect of some intervention or \emph{treatment} and some other covariates. In particular we aim to predict, from some input covariates, the change in outcome for a given sample upon applying a given intervention, while by definition never being able to observe a sample when the given treatment has both been applied and not been applied (referred to as the \emph{fundamental problem for causal inference}; \citealp{holland_statistics_1986}). Similar to how we approached survival, we first establish some terminology for causal inference without considering prediction based on covariates, and then move on to consider heterogeneous treatment effects.
+
+\subsection{Potential outcomes}
+First we consider the following scenario: a response variable $Y$ taking values in $\mathcal{Y}$, a binary treatment indicator variable $A$ taking values in $\{0,1\}$, and a variable of potential confounders $X$ taking values in $\mathcal{X} \in \mathbb{R}^p$. We want to gauge the effect of altering the treatment $A$ on the outcome $Y$. A natural quantity to estimate might be
+\[\mathbb{E}[Y | A = 1] - \mathbb{E}[Y | A = 0].\]
+However, if both $Y$ and $A$ depend on $X$, we might observe some spurious dependencies. We therefore want to develop a framework in which we are comparing reasonable \emph{potential outcomes} of $Y$ in a hypothetical alternate universe in which we had intervened/not intervened to change $A$.
+
+Further to the above, we propose the following. Let $Y^{(0)}, Y^{(1)}$ refer to potential outcomes taken by $Y$ under intervention with $A=0,1$
+respectively. We may therefore say that $Y=Y^{(A)}$. In the alternate notation of do-calculus \citep{pearl_causal_1995, pearl_-calculus_2012}, we would say that $\mathbb{P}(Y^{(a)} = y) := \mathbb{P}(Y = y |  \text{do}(A=a))$. We make two further assumptions: 
+\begin{enumerate}
+    \item The propensity function has global support over the support of $X$, i.e. 
+    \[\pi(x) := \mathbb{P}(A=1 | X = x) \  \text{is such that} \ \pi(X) \in (0,1) \ \text{almost surely.}\]
+    \item Treatment is essentially random given $X$, i.e.
+    \[\{Y^{(0)}, Y^{(1)}\} \perp\!\!\!\perp A | X. \]
+\end{enumerate}
+These are considered sufficient for the \emph{average treatment effect} $ATE := \mathbb{E}[Y^{(1)} -Y^{(0)}]$ to be identifiable, since 
+\begin{align*}
+    ATE & = \mathbb{E}[Y^{(1)} - Y^{(0)} ] & \\
+    & = \mathbb{E}[\mathbb{E}[Y^{(1)} - Y^{(0)} | X]] & \text{(by the tower property)} \\
+    & = \mathbb{E}[\mathbb{E}[Y^{(1)} | X]] - \mathbb{E}[\mathbb{E}[Y^{(0)} | X]] & \\ 
+    & = \mathbb{E}[\mathbb{E}[Y^{(1)} | X, A = 1]] - \mathbb{E}[\mathbb{E}[Y^{(0)} | X, A = 0]] & \text{(by Assumption~2)} \\
+    & = \mathbb{E}[\mathbb{E}[Y | X, A = 1] - \mathbb{E}[Y | X, A = 0]], & \label{eq:ate}
+\end{align*}
+and $X$, $Y$ and $A$ are all observed quantities, and Assumption~1 establishes we can expect to observe samples with both $A=0$ and $A=1$ across the support of $X$. Estimators of the $ATE$ have been proposed for a variety of modelling assumptions and contexts \citep{reiersol_confluence_1945, thistlethwaite_regression-discontinuity_1960, rosenbaum_central_1983, abadie_semiparametric_2005, craig_natural_2017, roth_whats_2023}. One common such method is propensity score matching, which relies on partitioning observations into groups with approximately equal propensity scores. Note that 
+\begin{align*}
+    \mathbb{P}(A=1 | \pi(X), Y^{(1)}, Y^{(0)}) & = \mathbb{E}[A | \pi(X), Y^{(1)}, Y^{(0)}] & \\
+    & = \mathbb{E}[\mathbb{E}[A | X, Y^{(1)}, Y^{(0)}] | \pi(X), Y^{(1)}, Y^{(0)}] & \text{(by the tower property)}\\
+    & = \mathbb{E}[\mathbb{E}[A|X]|\pi(X), Y^{(1)}, Y^{(0)}] & \text{(by Assumption~2)} \\
+    & = \mathbb{E}[\pi(X) | \pi(X), Y^{(1)}, Y^{(0)}] & \text{(by definition of propensity)} \\
+    & = \pi(X) = \mathbb{P}(A=1|\pi(X)), &
+\end{align*}
+so that $\{Y^{(0)}, Y^{(1)}\} \perp\!\!\!\perp A | X \Rightarrow \{Y^{(0)}, Y^{(1)}\} \perp\!\!\!\perp A | \pi(X)$ (this is due to \citealt{rosenbaum_central_1983}). We can then say that
+\[ATE = \mathbb{E}[\mathbb{E}[Y|\pi(X), A=1] - \mathbb{E}[Y|\pi(X), A=0]].\]
+To estimate the average treatment effect we therefore need only to average over the marginal distribution of $\pi(X)$ rather than the entire marginal distribution of $X$, which can be particularly useful when $X$ is high-dimensional.
+
+While it is often useful to gauge the utility of a treatment across an entire population via the ATE, it does not necessarily make any progress towards recommending whether treatment will benefit a given patient. For this, we need heterogeneous, conditional, or individual treatment effect, discussed in the following section.
+
+\subsection{Treatment with inputs (heterogeneous treatment effect)}
+We now define heterogeneous treatment effect (also referred to as conditional average treatment effect), which will be our tool to make predictions at the individual level. We define the treatment function $\tau: \mathcal{X} \rightarrow \mathcal{Y}$ as follows:
+\begin{align*}
+    \tau(x) & := \mathbb{E}[Y^{(1)} | X =x] - \mathbb{E}[Y^{(0)} | X=x] \\
+    & = \mu_1(x) - \mu_0(x) 
+\end{align*}
+where $\mu_a(x) := \mathbb{E}[Y^{(a)}|X=x]$ is the conditional regression function for potential outcome $A=a$. Note that the logic demonstrated in the derivation of the identifiability of the ATE applies to conditional treamtent effect and we can also say that (under Assumptions~1~and~2) we have that $\mu_a(x) = \mathbb{E}[Y|X=x,A=a]$. This means that one viable strategy for estimation of heterogeneous treatment effect is simply to estimate $\mu_0,\mu_1$ with $\hat{\mu}_0, \hat{\mu}_1$ respectively, and $\tau$ with $\hat{\tau}(x) := \hat{\mu}_1(x) - \hat{\mu}_0(x)$. We will discuss this strategy, known as a $T$-Learner, and its potential shortcomings in the next section.
+
+While we've introduced heterogeneous treatment effect in order to be able to make decisions at the individual level, it is worth pointing out that it is in general distinct from individual treatment effect \citep{vegetabile_distinction_2021}. In essence, since heterogeneous effect only requires conditioning on some set of covariates satisfying the strong ignorability assumption, it need not contain all relevant information about $Y$. In particular, suppose we are given a variable $X$ satisfying strong ignorability. Then we can form $X'=(X,Z)$ for any other covariate $Z$ estimate an identifiable heterogeneous treatment effect. To emphasis the difference between truly individual treatment effects and those based merely on conditioning on some strongly ignorable set of variables, some authors use the term \emph{conditional average treatment effect} \citep{vegetabile_distinction_2021}.
+
+\subsection{Meta-learner strategies}
+As mentioned in the above, we divide strategies for estimating heterogeneous treatment effect into general classes of \emph{meta-learner} \citep{kunzel_metalearners_2019, curth_nonparametric_2021}. Each of these relies on some baseline strategy for fitting a regression function, and applies it to some combination of target functions. We describe a few below.
+
+\begin{enumerate}
+    \item \label{tech:tlearner} $T$-Learners: as described above, the base strategy centred on the identifiability of the conditional regression functions $\mu_0, \mu_1$. We therefore fit $\hat{\mu}_0(x), \hat{\mu}_1(x)$ separately based on subsetting the given dataset into subsets with $A=0$ and $A=1$, and define 
+    \[ \hat{\tau}(x) := \hat{\mu}_1(x) - \hat{\mu}_0(x).\]
+    \item $S$-Learners: very similar to the $T$-Learner strategy above, and in some simple cases identical. In this setting we fit $\hat{\mu}(x,a)$ such that $\hat{\mu}(x,0) \approx \mu_0(x)$ and that $\hat{\mu}(x, 1) \approx \mu_1(x)$, then define
+    \[\hat{\tau}(x) := \hat{\mu}(x,1) - \hat{\mu}(x,0).\]
+    \item \citet{kunzel_metalearners_2019} introduced $X$-Learners, an extension and generalisation of $T$-Learners which comprise three stages. The first stage is identical to the $T$-Learner meta-algorithm, producing estimated conditionals $\hat{\mu}_0, \hat{\mu}_1$. In the second, two candidate HTE functions $\hat{\tau}_0, \hat{\tau}_1$ are fitted, where $\hat{\tau}_1$ aims to predict $\Tilde{D}^{(1)} := Y^{(1)} - \hat{\mu}_0(X)$ from $X$ and $\hat{\tau}$ aims to predict $\Tilde{D}^{(0)} := \hat{\mu}_1(X) - Y^{(0)}$. The final fit is then comprised by combining these functions according to an average weighted by a further function $g(x)$, i.e. $\hat{\tau}(x) := g(x)\hat{\tau}_0(x) + (1-g(x))\hat{\tau}_1(x)$. Special cases of this have been explored by, for example, \citet{curth_nonparametric_2021}.
+    \item \label{tech:ipw} Methods based on \emph{psuedo-outcomes} define some intermediate statistic that can be estimated based on observed data. The simplest is based on inverse probability weighting and the Horvitz-Thompson transformation \citep{horvitz_generalization_1952}, also known as \gls{ipw}. We define 
+    \[\Tilde{Y}_{IPW} := \Big(\frac{A}{\hat{\pi}(X)} + \frac{1-A}{1-\hat{\pi}(X)}\Big)Y, \]
+    relying on the observation that, if $\hat{\pi}(x) = \pi(x)$, then $\mathbb{E}[\Tilde{Y}_{IPW} | X =x] = \tau(x)$. The advantage of this approach is that the quantity $\Tilde{Y}_{IPW}$ only depends on observable quantities, and so can be estimated from the full dataset.
+    \item Hybrid methods comprise some combination of strategies based on fitting potential regression functions (for example via $T$-Learners) and pseudo-outcomes. These include those proposed by \citet{curth_nonparametric_2021} and \citet{kennedy_optimal_2020}. These are aimed towards `double robustness', whereby a learner produces consistent estimates if only one of $\hat{\mu}$ and $\hat{\pi}$ are correctly specified.
+    \item \citet{shalit_estimating_2017} proposed a method based on distributional regularisation such that information is shared between $\hat{\mu}_1$ and $\hat{\mu}_0$.
+\end{enumerate}
+
+\subsection{Double robustness} \label{sec:doublerobustness}
+In setting in which the \gls{cate} may demonstrate complex but nontrivial structure, its an important open question to try and provide estimators that are demonstrably robust and flexible, ideally including robustness to various forms of model mis-specification. To motivate this final point, we consider a few heuristic cases. 
+
+The first is in which each conditional regression function $\mu_a \ (a=0,1)$ displays complex, nonlinear behaviour, but in which the \emph{difference} between the two functions is very simple (e.g. constant or linear). In this setting the $T$-Learner strategy defined above in \eqref{tech:tlearner} may struggle due to imperfect (and potentially unnecessary) attempts to fit each of these complex functions separately. In this setting, however, a psuedo-outcome based approach such as the \gls{ipw} strategy described above in \eqref{tech:ipw} may perform far better (for a specific example see \citealp{kennedy_towards_2022}). 
+
+\begin{figure}[!tpb] 
+\centering
+\includegraphics[width=4in]{insert_sim_fig_1_here.png}
+\caption{Example setting in which \gls{ipw} strategy will outperform complementary $T$-Learner.  \label{fig:insert_sim_fig_1_here}}
+\end{figure}
+
+However, we note that the \gls{ipw} strategy relies on estimates of the propensity function $\pi(x)$. In an alternate case where this function displayed substantial complexity, but the $\mu_a$ were simple, we may expect the $T$-Learner strategy to drastically outperform \gls{ipw}. 
+
+\begin{figure}[!tpb] 
+\centering
+\includegraphics[width=4in]{insert_sim_fig_2_here.png}
+\caption{Example setting in which \gls{ipw} strategy will be outperformed by complementary $T$-Learner.  \label{fig:insert_sim_fig_2_here}}
+\end{figure}
+
+These illustrative cases are representative of two potential sources of error via model mis-specification. The aim of double robustness is to create estimators of \gls{cate} that work in each case. Formally, we aim to produce consistent estimates even if one of $\pi(x)$ or $\mu_a(x)$ are misspecified. Practically, this tends to work via weighted combinations of \gls{ipw}-style and $T$-Learner style estimates. 
+
+% Is this related to the double robustness of, e.g., \citet{kang_demystifying_2007}? \citep{kennedy_towards_2022, cui_estimating_2022}
+
+\subsection{Regularisation}
+Any way of viewing the two heuristic extremes described in Section~\ref{sec:doublerobustness} is as a balance between sharing information between the functions $\mu_0$ and $\mu_1$ and allowing them to be as flexible as possible in order to capture nuances to the difference between them (i.e. the treatment effect). \citet{shalit_estimating_2017} proposed a method based on representation learning, in which three functions are learned: $\Phi(x), h_0(x), h_1(x)$, such that $\hat{\mu}_a(x) := h_a(\Phi(x))$. In this way information is shared between $\hat{\mu}_0$ and $\hat{\mu}_1$ via the embedding $\Phi$. The strength of this sharing is determining by applying a regularisation term to the loss function when fitting all three functions simultaneously, which penalises distributional divergence between $\Phi(X) \ | \ A = 1$ and $\Phi(X)  \ | \ A = 0$. 
+
+\section{Heterogeneous treatment effects applied to survival analysis}
+
+\section{Application to an immunotherapy dataset}
+\section{Conclusions}
 \dobib % renders bibliography (only when compiling for chapter only)
 
 
