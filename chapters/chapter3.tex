@@ -12,13 +12,13 @@ It has been understood for a long time that cancer, a disease occurring in many 
 
 Exome-wide prognostic biomarkers for immunotherapy are now well-established -- in particular, \gls{tmb} is used to predict response to immunotherapy \citep{zhu_association_2019, cao_high_2019}.  \gls{tmb} is defined as the total number of non-synonymous mutations occurring throughout the tumour exome, and can be thought of as a proxy for how easily a tumour cell can be recognised as foreign by immune cells \citep{chan_development_2019}. However, the cost of measuring \gls{tmb} using \gls{wes} \citep{sboner_real_2011} currently prohibits its widespread use as standard-of-care.  Sequencing costs, both financial and in terms of the time taken for results to be returned, are especially problematic in situations where high-depth sequencing is required, such as when utilising blood-based \gls{ctdna} from liquid biopsy samples \citep{gandara_blood-based_2018}. The same issues are encountered when measuring more recently proposed biomarkers such as \gls{tib} \citep{wu_tumor_2019,turajlic_insertion-and-deletion-derived_2017}, which counts the number of frameshift insertion and deletion mutations. There is, therefore, demand for cost-effective approaches to estimate these biomarkers \citep{fancello_tumor_2019, golkaram_interplay_2020}.
 
-In this paper we propose a novel, data-driven method for biomarker estimation, based on a generative model of how mutations arise in the tumour exome.  More precisely, we model mutation counts as independent Poisson variables, where the mean number of mutations depends on the gene of origin and variant type, as well as the \gls{bmr} of the tumour. Due to the ultrahigh-dimensional nature of sequencing data and the fact that in many genes mutations arise purely according to the \gls{bmr}, we use a regularisation penalty when estimating the parameters of the model. In addition, this identifies a subset of genes that are mutated above or below the background rate.  Our model facilitates the construction of a new estimator of \gls{tmb}, based on a weighted linear combination of the number of mutations in each gene. The vector of weights is chosen to be sparse (i.e.~have many entries equal to zero), so that our estimator of \gls{tmb} may be calculated using only the mutation counts in a subset of genes. In particular, this allows for accurate estimation of \gls{tmb} from a targeted gene panel, where the panel size (and therefore the cost) may be determined by the user.  
+In this chapter we propose a novel, data-driven method for biomarker estimation, based on a generative model of how mutations arise in the tumour exome.  More precisely, we model mutation counts as independent Poisson variables, where the mean number of mutations depends on the gene of origin and variant type, as well as the \gls{bmr} of the tumour. Due to the ultrahigh-dimensional nature of sequencing data and the fact that in many genes mutations arise purely according to the \gls{bmr}, we use a regularisation penalty when estimating the parameters of the model. In addition, this identifies a subset of genes that are mutated above or below the background rate.  Our model facilitates the construction of a new estimator of \gls{tmb}, based on a weighted linear combination of the number of mutations in each gene. The vector of weights is chosen to be sparse (i.e.~have many entries equal to zero), so that our estimator of \gls{tmb} may be calculated using only the mutation counts in a subset of genes. In particular, this allows for accurate estimation of \gls{tmb} from a targeted gene panel, where the panel size (and therefore the cost) may be determined by the user.  
 
 We demonstrate the excellent practical performance of our framework using a \gls{nsclc} dataset {\citep{campbell_distinct_2016}}, and include a comparison with existing state-of-the-art approaches for estimating \gls{tmb}. {We further validate these results by testing the performance on data from {two more NSCLC studies \citep{hellmann_genomic_2018, rizvi_mutational_2015}}}.  Moreover, since our model allows variant type-dependent mutation rates, it can be adapted easily to predict other biomarkers, such as \gls{tib}. Our method may also be used in combination with an existing targeted gene panel. In particular, we can estimate a biomarker directly from the panel, or first augment the panel and then construct an estimator.  {Finally, in order to further investigate the utility of our proposal across a range of mutation profiles, we use it to select targeted gene panels and estimate \gls{tmb} in six other cancer types.} 
 
 Due to its emergence as a biomarker for immunotherapy in recent years, a variety of groups have considered methods for estimating \gls{tmb}. A simple and common way to estimate \gls{tmb} is via the proportion of mutated codons in a targeted region. \citet{budczies_optimizing_2019} investigate how the accuracy of predictions made in this way are affected by the size of the targeted region, where mutations are assumed to occur at uniform rate throughout the genome. More recently \citet{yao_ectmb_2020} modelled mutations as following a negative binomial distribution while allowing for gene-dependent rates, which are inferred by comparing nonsynonymous and synonymous mutation counts. In contrast, our method does not require data including synonymous mutations. Where they are included, we do not assume that synonymous mutations occur at a uniform rate throughout the genome, giving us the flexibility to account for location-specific effects on synonymous mutation rate such as chromatin configuration \citep{makova_effects_2015} and transcription-dependent repair mechanisms \citep{fong_intertwined_2013}. Linear regression models have been used for both panel selection \citep{lyu_mutation_2018} and for biomarker prediction \citep{guo_exon_2020}. A review of some of the issues arising when dealing with targeted panel-based predictions of \gls{tmb} biomarkers is given by \citet{wu_designing_2019}. Finally, we are unaware of any methods for estimating \gls{tib} from targeted gene panels. 
 
-The remainder of the paper is as follows. In Section \ref{sec:methodology}, we introduce our \gls{nsclc} data sources, and provide a detailed description of our methodological proposal.  {The full demonstration of our method using the NSCLC dataset is}  given in Section~\ref{sec:experimentalresults}. {Section~\ref{sec:robust} provides several further analyses to investigate the robustness of our proposal in other cancer types} and we conclude in Section~\ref{sec:conclusion}.  We also provide an \texttt{R} package \texttt{ICBioMark} \citep{bradley_icbiomark_2021} which implements the methodology and reproduces the experimental results in the paper. 
+The remainder of the chapter is as follows. In Section \ref{sec:methodology}, we introduce our \gls{nsclc} data sources, and provide a detailed description of our methodological proposal.  {The full demonstration of our method using the NSCLC dataset is}  given in Section~\ref{sec:experimentalresults}. {Section~\ref{sec:robust} provides several further analyses to investigate the robustness of our proposal in other cancer types} and we conclude in Section~\ref{sec:conclusion}.  We also provide an \texttt{R} package \texttt{ICBioMark} \citep{bradley_icbiomark_2021} which implements the methodology and reproduces our experimental results. 
 
 
 \section{Methodology}
@@ -44,7 +44,7 @@ Our methodology can be applied to any annotated mutation dataset obtained by \gl
 \vspace*{-2mm}
 \end{figure}
 
-It is useful at this point to introduce the notation used throughout the paper. The set $G$ denotes the collection of genes that make up the exome. For a gene $g \in G$, let $\ell_g$ be the length of $g$ in nucleotide bases, defined by the maximum coding sequence\footnote{The maximum coding sequence is defined as the collection of codons that may be translated for some version of a gene, even if all the codons comprising the maximum coding sequence are never simultaneously translated. Gene coding lengths are extracted from the \emph{Ensembl} database \citep{yates_ensembl_2020}.}.  A gene panel is a subset $P \subseteq G$, and we write $\ell_P := \sum_{g \in P} \ell_g$ for its total length. We let $S$ denote the set of variant types in our data (e.g.~in the dataset mentioned above, $S$ contains the seven possible non-synonymous variants). Now, for $i = 0, 1, \ldots, n$, let $M_{igs}$ denote the count of mutations in gene $g \in G$ of type $s \in S$ in the $i$th sample. Here the index $i=0$ is used to refer to an unseen test sample for which we would like to make a prediction, while the indices $i=1,\ldots,n$ enumerate the samples in our training data set.  In order to define the exome-wide biomarker of particular interest, we specify a subset of mutation types $\bar{S} \subseteq S$, and let
+It is useful at this point to introduce the notation used throughout this chapter. The set $G$ denotes the collection of genes that make up the exome. For a gene $g \in G$, let $\ell_g$ be the length of $g$ in nucleotide bases, defined by the maximum coding sequence\footnote{The maximum coding sequence is defined as the collection of codons that may be translated for some version of a gene, even if all the codons comprising the maximum coding sequence are never simultaneously translated. Gene coding lengths are extracted from the \emph{Ensembl} database \citep{yates_ensembl_2020}.}.  A gene panel is a subset $P \subseteq G$, and we write $\ell_P := \sum_{g \in P} \ell_g$ for its total length. We let $S$ denote the set of variant types in our data (e.g.~in the dataset mentioned above, $S$ contains the seven possible non-synonymous variants). Now, for $i = 0, 1, \ldots, n$, let $M_{igs}$ denote the count of mutations in gene $g \in G$ of type $s \in S$ in the $i$th sample. Here the index $i=0$ is used to refer to an unseen test sample for which we would like to make a prediction, while the indices $i=1,\ldots,n$ enumerate the samples in our training data set.  In order to define the exome-wide biomarker of particular interest, we specify a subset of mutation types $\bar{S} \subseteq S$, and let
 \begin{equation}
 T_{i\bar{S}} := \sum_{g \in G} \sum_{s \in \bar{S}} M_{igs},
 \label{eq:biomarker}
@@ -54,7 +54,7 @@ for $i=0,\ldots, n$.  For example, including all non-synonymous mutation types i
 Our main goal is to predict $T_{0\bar{S}}$ based on $\{M_{0gs}: g \in P, s \in S\}$, where the panel $P \subseteq G$ has length $\ell_P$ satisfying some upper bound. When it is clear from context that we are referring to the test sample and a specific choice of biomarker (i.e.~$\bar{S}$ is fixed), we will simply write $T$ in place of $T_{0\bar{S}}$. 
 
 \subsection{Generative model \label{sec:genmodel}}
-We now describe the main statistical model that underpins our methodology. In order to account for selective pressures and other factors within the tumour, we allow the rate at which mutations occur to depend on the gene and type of mutation. Our model also includes a sample-dependent parameter to account for the differing levels of mutagenic exposure of tumours, which may occur due to exogenous (e.g.~UV light, cigarette smoke) or endogenous (e.g.~inflammatory, free radical) factors.  
+We now describe the main statistical model that underpins our methodology. In order to account for selective pressures and other factors within the tumour, we allow the rate at which mutations occur to depend on the gene and type of mutation. Our model also includes a sample-dependent parameter to account for the differing levels of mutagenic exposure of tumours, which may occur due to exogenous (e.g.~\gls{uv} light, cigarette smoke) or endogenous (e.g.~inflammatory, free radical) factors.  
 
 We model the mutation counts $M_{igs}$ as independent Poisson random variables with mutation rates $\phi_{igs} > 0$. More precisely, for $i = 0, 1, \ldots, n$, $g \in G$ and $s \in S$, we have
 \begin{equation}
@@ -158,6 +158,134 @@ We now comment briefly on some computational aspects of our method. The generati
 
 Finally we describe a heuristic procedure for producing prediction intervals around our point estimates.  In particular, for a given confidence level $\alpha \in (0,1)$, we aim to find an interval $[\hat{T}_{\mathrm{L}}, \hat{T}_{\mathrm{U}}]$ such that $\mathbb{P}\bigl(\hat{T}_{\mathrm{L}} \leq T \leq \hat{T}_{\mathrm{U}}\bigr) \geq 1- \alpha.$  To that end, let $t_\alpha := \mathbb{E}\{(\hat{T} - T)^2\}/\alpha$, then by Markov's inequality we have that $\mathbb{P}(|\hat{T} - T|^2 \geq t_\alpha) \leq \alpha$. It follows that $[\hat{T} - t_\alpha^{1/2} , \hat{T}+ t_\alpha^{1/2}]$ is a $(1-\alpha)$-prediction interval for $T$. Of course, the mean squared error $\mathbb{E}\{(\hat{T}-T)^2\}$ defined in \eqref{eq:MSE} depends on the parameters $\lambda, \eta, \nu$ and $\mu_0$, which are unknown.  Our approach is to utilise the estimates $\hat{\lambda}, \hat{\eta}, \hat{\nu}$ (see \eqref{eq:genparams}) and replace $\mu_0$ with $\log(\hat{T}/\sum_{g,s}\ell_g\exp(\hat{\lambda}_g + \hat{\nu}_s + \hat{\eta}_{gs}))$. While this is not an exact $(1-\alpha)$-prediction interval for $T$,  we will see in our experimental results in Sections~\ref{sec:tmb}~and~\ref{sec:indel} that in practice this approach provides intervals with valid empirical coverage.  
 
+\subsection{Implementation in {R} with \texttt{ICBioMark} \label{sec:icbiomark}}
+In this section we'll demonstrate use of the R package \texttt{ICBioMark} \citep{bradley_icbiomark_2021} on a toy example containing simulated data. The same core workflow, applied to real data, will form almost all of the results described throughout the remained of the chapter.
+
+The package \texttt{ICBioMark} is available via the R repository CRAN and so can be installed and loaded with:
+\begin{lstlisting}
+    install.packages(`ICBioMark')
+    library(ICBioMark)
+\end{lstlisting}
+or from GitHub with:
+\begin{lstlisting}
+    install.packages(`devtools') 
+    devtools::install_github(`cobrbra/ICBioMark')
+    library(ICBioMark)
+\end{lstlisting}
+(note that the GitHub version is development and may not be as stable as the CRAN release, but may contain more features). The toy dataset we use here comes pre-loaded with the package, but just comes from the data simulation function \lstinline{generate_maf_data()}, which allows for a variety of choices of dataset size and shape.
+
+Our example dataset, called \lstinline{example_maf_data}, is a list with two elements: \lstinline{maf} and \lstinline{gene_lengths}. These two pieces of data are required for most of the tasks performed by \texttt{ICBioMark}. They are organised as follows:
+\begin{enumerate}
+    \item The dataset \lstinline{maf} is a data frame in \glsxtrlong{maf}. For a set of sequenced tumour/normal pairs, this means a table with a row for every mutation identified, with columns corresponding to properties such as the sample ID for the tumour of origin, the gene, chromosome and nucelotide location of the mutation, and the type of mutation observed. In the real world, \glsxtrshort{maf} datasets often have lots of extra information beyond this, but for our example we only include sample, gene and mutation type. See the first five rows in Table~\ref{tab:example_maf} -- generating code below: 
+\begin{lstlisting}
+    head(example_maf_data$maf, 5)
+\end{lstlisting}
+\begin{table}[hb]
+    \centering
+    \begin{tabular}{c|c|c}
+         \verb|Tumor_Sample_Barcode| & \verb|Hugo_Symbol| & \verb|Variant_Classification| \\
+         \hline
+\verb|SAMPLE_96| &	\verb|GENE_14|	& \verb|Missense_Mutation| \\
+\verb|SAMPLE_73| &	\verb|GENE_14| & \verb|Frame_Shift_Ins| \\
+\verb|SAMPLE_55| &	\verb|GENE_4| & \verb|Missense_Mutation| \\
+\verb|SAMPLE_96| &	\verb|GENE_3| & \verb|Missense_Mutation| \\
+\verb|SAMPLE_38| &	\verb|GENE_7| & \verb|Missense_Mutation| \\
+    \end{tabular}
+    \caption{First five rows of \lstinline{example_maf_data$maf}.}
+    \label{tab:example_maf}
+\end{table}
+
+    \item The data frame \lstinline{gene_lengths} contains the names (referred to by Hugo Symbol) of genes to be included in downstream modelling, alongside their length. As discussed above, gene length is a complex and subtle quantity to define -- we advise using coding length as defined in the \emph{Ensembl} database \citep{yates_ensembl_2020}. For this example, however, gene lengths are again randomly chosen by the simulating function. Example rows are given in Table~\ref{tab:example_gene_lengths} with accompanying code snippet below: 
+\begin{lstlisting}
+    head(example_maf_data$gene_lengths, 5)
+\end{lstlisting}
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{c|c}
+         \verb|Tumor_Sample_Barcode| & \verb|Hugo_Symbol| \\
+         \hline
+\verb|GENE_1| &	961	\\
+\verb|GENE_2| &	1009  \\
+\verb|GENE_3| &	1011  \\
+\verb|GENE_4| &	976 \\
+\verb|GENE_5| &	1016\\
+    \end{tabular}
+    \caption{First five rows of \lstinline{example_maf_data$gene_lengths}.}
+    \label{tab:example_gene_lengths}
+\end{table}
+\end{enumerate}
+ User-provided gene length datasets, which we recommend extracting from the \emph{Ensembl} database \citep{yates_ensembl_2020}, are permitted to contain values for more genes than are observed in the accompanying \gls{maf} dataset. In general, if a few genes covered by a \gls{wes} experiment are missing gene length information it will not drastically impact model performance, but lots of missing values will begin to cause issues with model accuracy. Later versions of this \texttt{ICBioMark} will address missing gene length data.
+
+In our next step we specify training/validation/test split and build model matries. The \gls{maf} format is widely used and standardised, but not especially helpful for sample(/patient)-level prediction. The ideal format for our data is a matrix in which every row corresponds to a sample, every column corresponds to a gene/mutation type combination, and each entry corresponds to how many mutations in that sample, gene and type were identified by sequencing. At the same time as this, we’d like to separate our training data from separately reserved validation and test data. We do this using the function \lstinline{get_mutation_tables()}.
+
+Our procedure, described in Section~\ref{sec:genmodel}, models different mutation types separately, so in theory one could have separate parameters for each mutation type (e.g. \texttt{`Missense\_Mutation'} or \texttt{`Frame\_Shift\_Ins'}). However, doing so would vastly increase the computational complexity of fitting a generative model. It is also not particularly informative to fit parameters to extremely scarce mutation types. Mutations types are grouped and filtered by the function \lstinline{get_mutation_dictionary()}. In general we recommend separately modelling indel mutations (so that we can predict \gls{tib} later), synonymous mutations (as these don’t count towards \gls{tmb} or \gls{tib}), and grouping together all other nonsynonymous mutation types. The function \lstinline{get_mutation_dictionary()} allows for the production of a list of mutation types, with labels for their groupings.
+
+Next we produce our training, validation and test sets. Again, for this example workflow these are availbale pre-loaded, but can also be produced with the \lstinline{`get_mutation_tables'} function. The object produced has three elements: \lstinline{`train'}, \lstinline{`val'} and \lstinline{`test'}. Each of these contains a sparse mutation matrix (\lstinline{`matrix'}) and other information describing the contents of the matrix (\lstinline{`sample_list'}, \lstinline{`gene_list'}, \lstinline{`mut_types_list'}, and \lstinline{`col_names'}). See example code below.
+
+\begin{lstlisting}
+    example_tables <- get_mutation_tables(
+        example_maf_data$maf,
+        sample_list = paste0("SAMPLE_", 1:100)
+    )
+    print(head(example_tables$train$col_names, 10))
+>  [1] `GENE_1_NS' `GENE_1_I'  `GENE_1_I'  `GENE_2_NS' 
+>  [5] `GENE_2_I'  `GENE_2_S'  `GENE_3_NS' `GENE_3_I'  
+>  [9] `GENE_3_S'  `GENE_4_NS'
+\end{lstlisting}
+
+At this point we are ready to fit a generative model, for which we need only to provide gene lengths data and training data to the function \lstinline{fit_gen_model()}. We can visualise output of our model with \lstinline{vis_model_fit()} (see Figure~\ref{fig:readme_example_gen_model}). Since this is a small example, we don’t get a particularly strong signal, but we do see an optimum level of penalisation.
+\begin{lstlisting}
+    example_gen_model <- fit_gen_model(
+        gene_lengths = example_maf_data$gene_lengths, 
+        table = example_tables$train
+    )
+
+    print(vis_model_fit(example_gen_model))
+\end{lstlisting}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=4in]{figures/chapter3/README-example_gen_model-1.png}
+    \caption{Output example showing the variation in cross-validated generative model fit for a model fitted to example simulated data.}
+    \label{fig:readme_example_gen_model}
+\end{figure}
+We now construct a first-fit predictive model. The parameter \lstinline{lambda} controls the sparsity of each iteration, so it may take some experimentation to get a good range of panel lengths. From this, we can construct a range of refit estimators.
+\begin{lstlisting}
+    example_first_pred_tmb <- pred_first_fit(
+        gen_model = example_gen_model, 
+        lambda = exp(seq(-9, -14, length.out = 100)),
+        training_matrix = example_tables$train$matrix, 
+        gene_lengths = example_maf_data$gene_lengths
+    )
+    example_refit_range <- pred_refit_range(
+        pred_first = example_first_pred_tmb, 
+        gene_lengths = example_maf_data$gene_lengths
+    )
+\end{lstlisting}
+
+With a predictive model fitted, we can use the function \lstinline{get_predictions()} along with a new (validation or test) dataset to produce predictions on that dataset. We then provide several functions including \lstinline{get_stats()} to analyse the output compared to true values (example results in Figure~\ref{fig:readme_example_predictions}).
+\begin{lstlisting}
+    example_refit_range %>% 
+        get_predictions(new_data = example_tables$val) %>%
+        get_stats(
+            biomarker_values = example_tmb_tables$val, 
+            model = "T", 
+            threshold = 10
+        ) %>% 
+        ggplot(aes(x = panel_length, y = stat)) + 
+            geom_line() + 
+            facet_wrap(~metric) + 
+            theme_minimal() + 
+            labs(
+                x = "Panel Length", 
+                y = "Predictive Performance"
+            )
+\end{lstlisting}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=4in]{figures/chapter3/README-example_predictions-1.png}
+    \caption{Example prediction summary statistics from \texttt{ICBioMark} estimators applied to simulated data.}
+    \label{fig:readme_example_predictions}
+\end{figure}
 \section{Demonstration using an NSCLC dataset \label{sec:experimentalresults}}
 
 In this section we demonstrate the practical performance of our proposal using the dataset from \citet{campbell_distinct_2016}, which we introduced in Section~\ref{sec:dataterminology}. Our main focus is the prediction of \gls{tmb}, and we show that our approach outperforms the state-of-the-art approaches. We also analyse the suitability of our generative model, consider the task of predicting the recently proposed biomarker \gls{tib}, and include a panel augmentation case study with the {TST-170} gene panel.
@@ -393,7 +521,7 @@ These datasets have a range of mutation rates, specifically the average \gls{tmb
 
 {The results on the external test datasets are more mixed; there is a drop off in performance in comparison with the internal validation results for breast cancer and melanoma, but apparent improvement for prostate cancer. This highlights that study effects, such as differences in patient demographics and clinical profiles, as well as variations in sequencing technologies need to be considered carefully. In practice, one should ensure that the patients in the training data used to fit the model have similar characteristics to the intended test cohort.}
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=6.5in]{../figures/chapter3/external_validation_fig.png} 
     \caption{The performance of our refitted \gls{tmb} estimator in the six further cancer types.    
@@ -403,7 +531,7 @@ These datasets have a range of mutation rates, specifically the average \gls{tmb
 
 
 \section{Conclusions \label{sec:conclusion}}
- We have introduced a new data-driven framework for designing targeted gene panels which allows for cost-effective estimation of exome-wide biomarkers.  Using the \acrlong{nsclc} datasets from \citet{campbell_distinct_2016}{,  \citet{hellmann_genomic_2018}, and \citet{rizvi_mutational_2015}}, we have demonstrated the excellent predictive performance of our proposal for estimating \acrlong{tmb} and \acrlong{tib}, and shown that it outperforms the state-of-the-art procedures. {We further tested the applicability and robustness of our method, by applying it to datasets on several other cancer types.}  Our framework can be applied to any tumour dataset containing annotated mutations, and we provide an \texttt{R} package \citep{bradley_icbiomark_2021} which implements the methodology.
+ We have introduced a new data-driven framework for designing targeted gene panels which allows for cost-effective estimation of exome-wide biomarkers.  Using the \glsxtrlong{nsclc} datasets from \citet{campbell_distinct_2016}{,  \citet{hellmann_genomic_2018}, and \citet{rizvi_mutational_2015}}, we have demonstrated the excellent predictive performance of our proposal for estimating \glsxtrlong{tmb} and \glsxtrlong{tib}, and shown that it outperforms the state-of-the-art procedures. {We further tested the applicability and robustness of our method, by applying it to datasets on several other cancer types.}  Our framework can be applied to any tumour dataset containing annotated mutations, and we provide an \texttt{R} package \citep{bradley_icbiomark_2021} which implements the methodology.
  
 {The main use of \gls{tmb} is often to help identify patients that are more likely to respond to immunotherapy. While TMB is a good single predictor of response \citep{cao_high_2019, zhu_association_2019}, it is of course desirable to improve the predictive performance by including other factors. For instance these may include cancer type (and subtype), specific mutational signatures, aneuploidy and tumor histology, as well as other variables, such as gender, age and exogenous factors. Indeed, \citet{litchfield_meta-analysis_2021} show that, by including markers of T-cell infiltration and other factors, a multivariate predictor of response to immunotherapy significantly improves the classification performance in comparison to using \gls{tmb} alone.  Nevertheless, one would certainly like to include \gls{tmb} (or a closely related measure) as a factor in any classifier of response. } 
 

@@ -2,7 +2,7 @@
 
 \begin{document}
 
-\section{Survival analysis}
+\section{Survival analysis \label{sec:survival}}
 
 \subsection{Survival times}
 
@@ -11,7 +11,7 @@ Survival analysis concerns modelling the amount of time elapsing before a given 
     \item `Survival times are continuous' ($t_i \in \mathbb{R}$). This is intuitively true in many situations, but we often only have access to discrete bins (e.g. months). This can lead to modelling complexities such as the presence of exact ties between observations.
     \item `Survival times are positive' ($t_i > 0$). This introduces another important notion: that survival times are \emph{relative} to some other point in time. The definition of this point in time can be important and varied between (and sometimes within) studies.
 \end{enumerate}
-Point two above emphasises the importance of appropriate definition of starting time for interpreting survival times. Of perhaps even greater subtlety can be the definition of end time. In the cases we're addressing, this tends to be patient death (often referred to as overall survival (OS)). However, we are often implicitly interested in analysing the likelihood of dying from one particular factor (e.g. lung cancer). In many studies, death from other causes (which, complexifying matters further, may be related non-trivially to the factor under study, e.g. dying from cardiac arrest while suffering lung failure) is counted identically to death from the cause of interest. In others, patients who die for other reasons may be excluded from the study. Both approaches have issues, but the latter case is an example of a more ubiqituous phenomenon in survival studies (at least those pertaining to human patients): \emph{censoring}.
+Point two above emphasises the importance of appropriate definition of starting time for interpreting survival times. Of perhaps even greater subtlety can be the definition of end time. In the cases we're addressing, this tends to be patient death (often referred to as \gls{os}). However, we are often implicitly interested in analysing the likelihood of dying from one particular factor (e.g. lung cancer). In many studies, death from other causes (which, complexifying matters further, may be related non-trivially to the factor under study, e.g. dying from cardiac arrest while suffering lung failure) is counted identically to death from the cause of interest. In others, patients who die for other reasons may be excluded from the study. Both approaches have issues, but the latter case is an example of a more ubiqituous phenomenon in survival studies (at least those pertaining to human patients): \emph{censoring}.
 
 \subsection{Censoring}
 In the previous section, we discussed a particular (in fact, quite complex and nuanced), form of censoring, but other forms are more clear cut. Censoring in general refers to any consideration that means that we do not get to observe the patient until they die of the cause of interest. We therefore might think of the example above as `censoring by death from other cause'. Here are two further types of censoring:

@@ -1,9 +1,10 @@
 % Document-defining preamble
 \documentclass[12pt,twoside,openright]{report} 
 \usepackage[phd]{edmaths}
+\usepackage[T1]{fontenc}
 
 % Title page meta-data 
-\title{Statistical Learning Approaches to Genomic Medicine}
+\title{Statistical and Machine Learning Approaches to Genomic Medicine}
 \author{Jacob R. Bradley}
 \date{2023}
 
@@ -12,6 +13,10 @@
 
 % Glossary
 \usepackage[acronym, toc]{glossaries-extra} % LINDEN DON'TUNCOMMENT
+\setabbreviationstyle[acronym]{long-short}
+\glssetcategoryattribute{acronym}{nohyperfirst}{true}
+\renewcommand*{\glsdonohyperlink}[2]{%
+ {\glsxtrprotectlinks \glsdohypertarget{#1}{#2}}}
 \usepackage[
 % draft, 
 colorlinks,linkcolor=black,citecolor=blue,urlcolor=blue,breaklinks = true
@@ -20,8 +25,8 @@ colorlinks,linkcolor=black,citecolor=blue,urlcolor=blue,breaklinks = true
 \makeglossaries 
 \newacronym{roc}{ROC}{receiver operating characteristic}
 \newacronym{tcga}{TCGA}{The Cancer Genome Atlas}
-\newacronym{pv}{PV}{polycythemia vera}
-\newacronym{tmb}{TMB}{tumour mutation Burden}
+\newacronym{pv}{PV}{polycythaemia vera}
+\newacronym{tmb}{TMB}{tumour mutation burden}
 \newacronym{icb}{ICB}{immune checkpoint blockade}
 \newacronym{ici}{ICI}{immune checkpoint inhibitor}
 \newacronym{msi}{MSI}{micro-satellite instability}
@@ -29,19 +34,22 @@ colorlinks,linkcolor=black,citecolor=blue,urlcolor=blue,breaklinks = true
 \newacronym{tib}{TIB}{tumour indel burden}
 \newacronym{ctla4}{CTLA-4}{cytotoxic T-lymphocyte associated protein 4}
 \newacronym{pdl1}{PD-L1}{programmed death ligand 1}
-\newacronym{wes}{WES}{whole exome sequencing}
+\newacronym{wes}{WES}{whole-exome sequencing}
 \newacronym{ctdna}{ctDNA}{circulating tumour DNA}
 \newacronym{bmr}{BMR}{background mutation rate}
 \newacronym{nsclc}{NSCLC}{non-small cell lung cancer}
-\newacronym{auprc}{AUPRC}{area under precision-recall Curve}
+\newacronym{auprc}{AUPRC}{area under precision-recall curve}
 \newacronym{ectmb}{ecTMB}{estimation and classification of tumour mutation burden}
 \newacronym{mcmc}{MCMC}{Markov chain Monte Carlo}
-\newacronym{dna}{DNA}{deoxyribonucleic acic}
+\newacronym{dna}{DNA}{deoxyribonucleic acid}
+\newacronym{rna}{RNA}{ribonucleic acid}
+\newacronym{cdna}{cDNA}{complementary DNA}
+\newacronym{gdna}{gDNA}{genomic DNA}
 \newacronym{qrtlamp}{qRT-LAMP}{quantitative reverse-transcription loop-mediated isothermal amplification}
-\newacronym{lamp}{LAMP}{Loop-mediated isothermal amplification}
+\newacronym{lamp}{LAMP}{loop-mediated isothermal amplification}
 \newacronym{qpcr}{qPCR}{quantitative polymerase chain reaction}
 \newacronym{pcr}{PCR}{polymerase chain reaction}
-\newacronym{mrna}{mRNA}{messenger ribonucleic acid}
+\newacronym{mrna}{mRNA}{messenger RNA}
 \newacronym{tt}{Tt}{time-to-threshold}
 \newacronym{ns}{NS}{NanoString}
 \newacronym{fip}{FIP}{forward inner primer}
@@ -57,6 +65,12 @@ colorlinks,linkcolor=black,citecolor=blue,urlcolor=blue,breaklinks = true
 \newacronym{wgs}{WGS}{whole-genome sequencing}
 \newacronym{ipw}{IPW}{inverse-probability weighting}
 \newacronym{cate}{CATE}{conditional average treatment effect}
+\newacronym{uv}{UV}{ultraviolet}
+\newacronym{os}{OS}{overall survival}
+\newacronym{maf}{MAF}{mutation annotated format}
+\newacronym{rdrp}{RdRp}{RNA-dependent RNA polymerase}
+\newacronym{rrna}{rRNA}{ribosomal RNA}
+\newacronym{ols}{OLS}{ordinary least squares}
 
 % \newglossaryentry{latex}
 % {
@@ -85,11 +99,17 @@ colorlinks,linkcolor=black,citecolor=blue,urlcolor=blue,breaklinks = true
 \newcommand{\cov}{\mathrm{Cov}}
 \newcommand{\bbE}{\mathbb{E}}
 
+% For adding quotes to beginning of sections
+\usepackage{epigraph} 
+
+% Typesetting code
+\usepackage{listings}
+
 % Editing tools (for when Tim gets involved)
-% \usepackage[draft,inline,nomargin,index]{fixme}
-% \fxsetup{theme=color,mode=multiuser}
-% \FXRegisterAuthor{tc}{atc}{\color{red} TC}
-% \FXRegisterAuthor{jb}{abc}{\color{green} JB}
+\usepackage[draft,inline,nomargin,index]{fixme}
+\fxsetup{theme=color,mode=multiuser}
+\FXRegisterAuthor{tc}{atc}{\color{green} TC}
+\FXRegisterAuthor{jb}{abc}{\color{red} JB}
 
 % Figures 
 \usepackage{graphicx}
@@ -98,8 +118,9 @@ colorlinks,linkcolor=black,citecolor=blue,urlcolor=blue,breaklinks = true
 \usepackage[ruled,vlined]{algorithm2e}
 
 
-% Bibliography 
+% Bibliography and referencing
 \usepackage{natbib}
+% \usepackage{xr}
 \usepackage{subfiles} % Manages subfiles
 \setcitestyle{authoryear, open={(},close={)}}
 
@@ -110,6 +131,7 @@ colorlinks,linkcolor=black,citecolor=blue,urlcolor=blue,breaklinks = true
 
 \begin{document}
 \def\dobib{} % Disable chapter-specific bibliographies
+\lstset{showstringspaces=false,language=R} % inline code settings
 
 \maketitle
 
@@ -145,7 +167,7 @@ assays \label{chap:lamp_modelling}}
 
 \subfile{chapters/chapter3}
 
-\chapter{Causal prediction of survival after immunotherapy with genomic signatures \label{chap:causal_genomics}}
+\chapter{Causal prediction of survival after immunotherapy with genomic mutation signatures \label{chap:causal_genomics}}
 
 \subfile{chapters/chapter4}
 
@@ -153,9 +175,9 @@ assays \label{chap:lamp_modelling}}
 \bibliographystyle{natbib}
 \bibliography{references.bib}
 
-\appendix
+% \appendix
 
-\chapter{Supervised Dimension Reduction}
-\subfile{chapters/appendix1}
+% \chapter{Supervised Dimension Reduction}
+% \subfile{chapters/appendix1}
 
 \end{document}
