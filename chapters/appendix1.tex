@@ -1,8 +1,29 @@
 \documentclass[../thesis.tex]{subfiles}
 
 \begin{document}
+In this appendix we discuss software and computational aspects of the analysis presented in Chapter~\ref{chap:lamp_modelling}. This is divided into two sections. 
 
-This chapter might be something to do with random projection ensembles.
+In Chapter~\ref{chap:lamp_modelling} we discuss the generation of several primer/amplicon \emph{features}, each a function of a given primer/amplicon's sequences. To ensure that this is reproducible and usable by other researchers, we produced an R package, \texttt{LAMPPrimerFeatures}, encapsulating the above functionality. In section~\ref{sec:lampprimerfeatures} we discuss the design and use of this package, working with a very small example dataset provided alongside the package. 
+
+Aside from the core functionality of producing primer features, we wanted the code-level specifics of our analysis to be available, understandable, and reproducible. In particular, readers should be able to re-run the entire analysis (from raw data) with little or no manual work, but also to understand the tools applied at each processing step without having to run the entire analysis themselves. Therefore, in Section~\ref{sec:lamp_targets} we demonstrate how we made use of the \texttt{targets} framework. The R package \texttt{targets} is a workflow management system, with which users define a dependency graph tracking the relationships between analysis quantities. This is useful for external readers/users to build an intuitive understand of the processed underlying the analysis, but also during development and computation -- the \texttt{targets} framework is able to track which sub-analyses have and haven't been run, as well as the impact on downstream quantities of changing functions/input data earlier in the analysis, e.g. in pre-processing.
+
+\section{R package \texttt{LAMPPrimerFeatures} \label{sec:lampprimerfeatures}}
+
+\subsection{Goals}
+
+\subsection{Functions and dependencies}
+
+\subsection{Example use case}
+
+
+\section{Implementation of LAMP analysis with \texttt{targets}}
+
+\subsection{Goals}
+
+\subsection{Specifying a dependency graph}
+
+\subsection{Running and tracking analyses}
+
 
 \dobib % renders bibliography (only when compiling for chapter only)
  

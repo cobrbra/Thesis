@@ -4,8 +4,14 @@
 \usepackage[T1]{fontenc}
 
 % Title page meta-data 
-\title{Statistical and Machine Learning Approaches to Genomic Medicine}
-\author{Jacob R. Bradley}
+\title{
+Statistical and Machine Learning Approaches to Genomic Medicine \vspace{100pt} \\ 
+\includegraphics[width=3in]{figures/misc/edi_uni_logo.png} \\
+\vspace{50pt}
+}
+\author{
+Jacob R. Bradley
+}
 \date{2023}
 
 % Sections
@@ -30,7 +36,7 @@ colorlinks,linkcolor=black,citecolor=blue,urlcolor=blue,breaklinks = true
 \newacronym{icb}{ICB}{immune checkpoint blockade}
 \newacronym{ici}{ICI}{immune checkpoint inhibitor}
 \newacronym{msi}{MSI}{micro-satellite instability}
-\newacronym{lasso}{LASSO}{least absolute shrinkage and selection pperator}
+\newacronym{lasso}{LASSO}{least absolute shrinkage and selection operator}
 \newacronym{tib}{TIB}{tumour indel burden}
 \newacronym{ctla4}{CTLA-4}{cytotoxic T-lymphocyte associated protein 4}
 \newacronym{pdl1}{PD-L1}{programmed death ligand 1}
@@ -71,6 +77,15 @@ colorlinks,linkcolor=black,citecolor=blue,urlcolor=blue,breaklinks = true
 \newacronym{rdrp}{RdRp}{RNA-dependent RNA polymerase}
 \newacronym{rrna}{rRNA}{ribosomal RNA}
 \newacronym{ols}{OLS}{ordinary least squares}
+\newacronym{ir}{IR}{image recognition}
+\newacronym{nlp}{NLP}{natural language processing}
+\newacronym[plural = SVMs, firstplural = support vector machines]{svm}{SVM}{support vector machine}
+\newacronym{sarscov2}{SARS-CoV-2}{severe acute respiratory syndrome coronavirus 2}
+\newacronym{pku}{PKU}{phenylketonuria}
+\newacronym[plural = HTEs, firstplural = heterogeneous treatment effects]{hte}{HTE}{heterogeneous treatment effect}
+\newacronym[plural = ATEs, firstplural = average treatment effects]{ate}{ATE}{average treatment effect}
+\newacronym{pgm}{PGM}{probabilistic graphical model}
+\newacronym{iqr}{IQR}{inter-quartile range}
 
 % \newglossaryentry{latex}
 % {
@@ -98,6 +113,8 @@ colorlinks,linkcolor=black,citecolor=blue,urlcolor=blue,breaklinks = true
 \newcommand{\var}{\mathrm{Var}}
 \newcommand{\cov}{\mathrm{Cov}}
 \newcommand{\bbE}{\mathbb{E}}
+\newcommand{\pihat}{\hat{\pi}}
+\newcommand{\muhat}{\hat{\mu}}
 
 % For adding quotes to beginning of sections
 \usepackage{epigraph} 
@@ -110,6 +127,7 @@ colorlinks,linkcolor=black,citecolor=blue,urlcolor=blue,breaklinks = true
 \fxsetup{theme=color,mode=multiuser}
 \FXRegisterAuthor{tc}{atc}{\color{green} TC}
 \FXRegisterAuthor{jb}{abc}{\color{red} JB}
+\usepackage{outlines}
 
 % Figures 
 \usepackage{graphicx}
@@ -151,6 +169,25 @@ colorlinks,linkcolor=black,citecolor=blue,urlcolor=blue,breaklinks = true
 \printglossary[type=\acronymtype]
 
 \tableofcontents
+~\\
+{\color{red} FOR TIM:
+I'm going to keep adding to this list of sections that are broadly speaking ready to be read and for comments. If you find you've run out of stuff to read then just pop me a message and I'll point you to stuff that is essentially done but needs more attention.
+\begin{outline}
+    \1 Abstract. This should now be locked in, as we've included in when reaching out to examiners and in filing NITS.
+    \1 Lay summary. I've tried to make this fairly fun and breezy. I'm guessing it's not the most important section in the world so have been pretty free with it, but let me know if it's not hitting the right tone.
+    \1 Section 1.1. This is a general overview of the type of content in the entire thesis (but not discussing any specifics of layout).
+        \2 1.1.0 Very general motivating questions for problems looked at across the thesis, and outline of the introduction chapter.
+        \2 1.1.1 Talking about what new types of genomics data are available and what problems in medicine they've been used to solve. First airtime for ideas like `subtyping' (motivation for Chapter 2) and `biomarkers to accompany therapy` (motivation for Chapter 3). Finish up with a mention of the difficulties combining disparate datasets (motivation for Chapter 4), and practical problems with the data (motivate the need for statistics and lead in to 1.1.2)
+        \2 1.1.2 Overview of statistical learning and machine learning. Bit of loose definition work talking about `prediction', `regression', `model fitting'. While ML is in the title of the thesis for cynical professional reasons, motivate why `can't we just use fancy ML stuff' isn't always/often an option with the data we're working with.
+    \1 Section 1.2 Biologial background necessary to understand what's going to happen in the rest of the thesis.
+        \2 1.2.1 The core relationships between genomics quantities (DNA, RNA, protein). Should give enough detail that when data types/specific datasets are introduced later on people will know where they fit into the bigger biology picture.
+        \2 1.2.2 Motivating that molecular biology as a whole has been useful in medicine. Not yet finished section on everything but cancer, then a fairly well-developed discussion of cancer specifically.
+    \1 Section 2. This is obviously an entire chapter. It's fairly well developed (hopefully). It would be great if at some point you could have a peruse and we can work on where the conceptual sticking points are for an informed statistical reader, and therefore what needs to go into the introducion to provide the background needed.
+    \1 Appendix B. This dicusses how the \texttt{ICBioMark} package is used. I did experiment with putting it in its own section in the chapter, but somehow it felt more at home in methods. Eventually after I decided there was enough to say about LAMP code to have an appendix, I decided to give it its own. Let me know what you think.
+    \1 Sections 4.1-4.3. These outline all aspects of heterogeneous treatment effect estimation up to (but not yet including) survival outcomes.
+    \1 4.3-4.5 I'm aware the lack of an in-depth Chapter~4 write-up makes things tricky. I've tried to make up for this by laying out in a fair amount of detail what I'm hoping to put where.
+\end{outline}
+}
 
 \chapter{Introduction \label{chap:intro}}
 
@@ -175,9 +212,15 @@ assays \label{chap:lamp_modelling}}
 \bibliographystyle{natbib}
 \bibliography{references.bib}
 
-% \appendix
+\appendix
 
-% \chapter{Supervised Dimension Reduction}
-% \subfile{chapters/appendix1}
+\chapter{Computational workflow for LAMP assay analysis}
+\subfile{chapters/appendix1}
+
+\chapter{In-depth model summaries for LAMP assay analysis}
+\subfile{chapters/appendix2}
+
+\chapter{Open-source software accompanying TMB estimation}
+\subfile{chapters/appendix3}
 
 \end{document}

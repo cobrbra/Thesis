@@ -4,7 +4,7 @@
 
 \section{Overview}
 This chapter is based on the paper `Hierarchical Bayesian modelling identifies key considerations in the development of quantitative loop-mediated isothermal amplification assays' \citep{bradley_hierarchical_2023}. \Gls{lamp} is a rapidly growing, fast, and cost-effective technique for detection of \glsxtrshort{dna}/\glsxtrshort{rna} in point-of-care biomedical applications. However, it remains unclear what factors affect LAMP's quantitative resolution, and experimental optimization of primers presents a major bottleneck in assay design. A lack of model-based frameworks to characterize LAMP data and address these questions presents an unmet need for LAMP assay development.
-We present hierarchical Bayesian models of LAMP amplification based on Gompertz functions, and use these models to infer the effect of \glsxtrshort{rna} variation and other factors on \gls{lamp} amplification curves derived from 80 blood samples of patients with suspected acute infection. Our analysis uncovers associations between LAMP assay resolution and characteristics such as primer sequence composition and thermodynamic properties. In addition to correlations between \glsxtrshort{rna} input abundance and time shift of the the LAMP amplification curve, we also detect \glsxtrshort{rna}-dependent assocations with amplification rate.  We further investigate associations between primer/target properties and quantitative performance of the assay by generating a set of synthetic \glsxtrshort{rna} samples with systematically varied primer sequences and applying our framework. We find evidence that the associations observed are driven by across-target rather than within-target variation, an important observation for study design. Our findings represent important first steps towards guided development of quantitative \gls{lamp} assays.
+We present hierarchical Bayesian models of LAMP amplification based on Gompertz functions, and use these models to infer the effect of \glsxtrshort{rna} variation and other factors on \gls{lamp} amplification curves derived from 80 blood samples of patients with suspected acute infection. Our analysis uncovers associations between LAMP assay resolution and characteristics such as primer sequence composition and thermodynamic properties. In addition to correlations between \glsxtrshort{rna} input abundance and time shift of the LAMP amplification curve, we also detect \glsxtrshort{rna}-dependent assocations with amplification rate.  We further investigate associations between primer/target properties and quantitative performance of the assay by generating a set of synthetic \glsxtrshort{rna} samples with systematically varied primer sequences and applying our framework. We find evidence that the associations observed are driven by across-target rather than within-target variation, an important observation for study design. Our findings represent important first steps towards guided development of quantitative \gls{lamp} assays.
 
 
 \section{Introduction \label{sec:intro}}
@@ -16,7 +16,7 @@ As in \gls{pcr}, \gls{lamp} specificity relies on primer-target complementarity.
 \begin{figure}[!tpb] 
 \centering
 \includegraphics[width=5in]{../figures/chapter2/paper_lamp_fig.png}
-\caption{Intermediate steps in the \glsxtrshort{qrtlamp} reaction. \textbf{A}: Following reverse transcription, any of the primers F3, FIP (comprising F2 and F1c sequences), and LB may anneal to the \gls{cdna} template. Polymerization from the bound FIP primer leads to introduction of the F1c sequence into the product. \textbf{B}: Annealing of the F1c sequence to its complement creates a loop. The primers B3, BIP (comprising B2 and B1c sequences), and LF anneal to this single-loop template. \textbf{C}: Annealing of the B1c sequence to its complement creates another loop, resulting in the canonical ``dumbbell'' \gls{lamp} template, or amplicon. \textbf{D}: The stem region of the dumbbell template (the span between F1c and B1 sequence regions) contains the target sequence of interest while the loop regions (the regions spanning from F1c/B1 (inclusive) to F1/B1c (exclusive)) provide additional sites to initiate polymerization. Crucially, any of the six primers may anneal and initiate polymerization at any point at which a complementary region is available, leading to creation of other products (not shown for simplicity) distinct from the canonical product.\label{fig:lampoverview}}
+\caption{Intermediate steps in the \glsxtrshort{qrtlamp} reaction. \textbf{A}: Following reverse transcription, any of the primers F3, FIP (comprising F2 and F1c sequences), and LB may anneal to the cDNA template. Polymerization from the bound FIP primer leads to introduction of the F1c sequence into the product. \textbf{B}: Annealing of the F1c sequence to its complement creates a loop. The primers B3, BIP (comprising B2 and B1c sequences), and LF anneal to this single-loop template. \textbf{C}: Annealing of the B1c sequence to its complement creates another loop, resulting in the canonical ``dumbbell'' \gls{lamp} template, or amplicon. \textbf{D}: The stem region of the dumbbell template (the span between F1c and B1 sequence regions) contains the target sequence of interest while the loop regions (the regions spanning from F1c/B1 inclusive to F1/B1c exclusive) provide additional sites to initiate polymerization. Crucially, any of the six primers may anneal and initiate polymerization at any point at which a complementary region is available, leading to creation of other products (not shown for simplicity) distinct from the canonical product.\label{fig:lampoverview}}
 \end{figure}
 While \gls{lamp} has primarily been used in qualitative/detection applications, advances in measurement technology~\citep{zhang_brief_2014, becherer_loop-mediated_2020}, in particular automated fluorescence detection for producing \gls{lamp} amplification curves, have enabled quantitative use of the assay. We have previously extended this approach to measurement of \gls{mrna} in a given sample, a technique referred to throughout as \glsxtrshort{qrtlamp} (\citealp{remmel_diagnostic_2022}; see Figure~\ref{fig:lampoverview}). 
 
@@ -47,7 +47,7 @@ Here we present a model-based analysis of the quantitative characteristics of th
 \subsection{Datasets and technologies \label{sec:data}}
 We produced two datasets, one derived from clinical samples and one from synthetic \gls{ivt} \glsxtrshort{rna} templates. Our clinical dataset comprised remnants of previously-collected PAXgene \glsxtrshort{rna}~\citep{ram-mohan_using_2022} blood samples collected from 80 patients, each adjudicated to be either bacterially infected (N=21), virally infected (N=22), or non-infected (N=37). 
 Patients samples were taken from two trials (clinicaltrial.gov/NCT03744741: ``HostDx Sepsis in the Diagnosis and Prognosis of Emergency Department Patients With Suspected Infections: a Multicenter Pilot Study'', and EudraCT/2020-001039-29: ``Efficiency in Management of Organ Dysfunction Associated with Infection by the Novel SARS-CoV-2 Virus Through a Personalized Immunotherapy Approach: The ESCAPE Clinical Trial: The `ESCAPE' Trial (a.k.a ESCAPE)'').
-At enrollment, patient blood was collected and immediately stored with PAXgene \glsxtrshort{rna} stabilization. For each individual, gene expression was measured for 32 target \glsxtrshort{rna} transcripts: 29 genes previously identified as targets of interest for bacterial/viral/non-infected classification~\citep{he_optimization_2021} as well as 3 housekeeper genes (KPNA6, RREB1 and YWHAB). Two independent aliquots of each sample underwent \glsxtrshort{rna} extraction for profiling by \gls{qrtlamp} and were dispensed along with primers and reagents and run on a 96-well plate with a QuantStudio\texttrademark~5 Real-Time PCR System for Human Identification (Applied Biosystems; Waltham, MA USA). We tracked fluorescence for 20 minutes or 60 arbitrary pseudo-cycles (1 cycle = 20 seconds). Another aliquot was used for \gls{mrna} quantification using the \gls{ns} nCounter system. The \gls{ns} nCounter system  directly counts RNA transcript number in a single step by measurement of fluorescence via hybridization of capture and reporter probes. As such, \gls{ns} measurements are a singular value (unlike other comparison technologies such as \gls{qpcr}) and very sensitive even at low expression levels \citep{geiss_direct_2008}. While \gls{ns} is unsuitable for point-of-care usage, it is an ideal technology to provide `gold standard' benchmark measurements. Higher \gls{ns} values correspond to higher target expression. We normalized \gls{ns} measurements by first rescaling counts such that housekeeper genes had a geometric mean of 1000 and then applying a \textsf{log}$_{2}$ transformation to the rescaled counts. To measure \gls{mrna} expression with \gls{qrtlamp}, we designed a set of six \gls{lamp} primers (FIP/BIP,~F3/B3,~and  LF/LB;~Figure~\ref{fig:lampoverview}) for each target using PrimerExplorer v5~\citep{eiken_primerexplorer_2019} or via a third-party service provider (Primer Digital, Ltd; Helsinki, Finland). \Gls{qrtlamp} reactions occurred at $65^{\circ}$C, in the presence of 90mM KCl and 8mM MgSO$_4$. Of the 29 targets of interest, we excluded 4 for technical reasons: {FURIN} and {S100A12} due to the use of different primer concentrations; {CTSB} and {DEFA4} as LF/LB primers did not anneal to their target sites.
+At enrollment, patient blood was collected and immediately stored with PAXgene \glsxtrshort{rna} stabilization. For each individual, gene expression was measured for 32 target \glsxtrshort{rna} transcripts: 29 genes previously identified as targets of interest for bacterial/viral/non-infected classification~\citep{he_optimization_2021} as well as 3 housekeeping genes (KPNA6, RREB1 and YWHAB). Two independent aliquots of each sample underwent \glsxtrshort{rna} extraction for profiling by \gls{qrtlamp} and were dispensed along with primers and reagents and run on a 96-well plate with a QuantStudio\texttrademark~5 Real-Time PCR System for Human Identification (Applied Biosystems; Waltham, MA USA). We tracked fluorescence for 20 minutes or 60 arbitrary pseudo-cycles (1 cycle = 20 seconds). Another aliquot was used for \gls{mrna} quantification using the \gls{ns} nCounter system. The \gls{ns} nCounter system  directly counts \glsxtrshort{rna}transcript number in a single step by measurement of fluorescence via hybridization of capture and reporter probes. As such, \gls{ns} measurements are a singular value (unlike other comparison technologies such as \gls{qpcr}) and very sensitive even at low expression levels \citep{geiss_direct_2008}. While \gls{ns} is unsuitable for point-of-care usage, it is an ideal technology to provide `gold standard' benchmark measurements. Higher \gls{ns} values correspond to higher target expression. We normalized \gls{ns} measurements by first rescaling counts such that housekeeping genes had a geometric mean of 1000 and then applying a \textsf{log}$_{2}$ transformation to the rescaled counts. To measure \gls{mrna} expression with \gls{qrtlamp}, we designed a set of six \gls{lamp} primers (FIP/BIP,~F3/B3,~and  LF/LB;~Figure~\ref{fig:lampoverview}) for each target using PrimerExplorer v5~\citep{eiken_primerexplorer_2019} or via a third-party service provider (Primer Digital, Ltd; Helsinki, Finland). \Gls{qrtlamp} reactions occurred at $65^{\circ}$C, in the presence of 90mM KCl and 8mM MgSO$_4$. Of the 29 targets of interest, we excluded 4 for technical reasons: {FURIN} and {S100A12} due to the use of different primer concentrations; {CTSB} and {DEFA4} as LF/LB primers did not anneal to their target sites.
 
 Our \gls{ivt} \glsxtrshort{rna} dataset (preparation described in~\citet{remmel_diagnostic_2022}) comprised measurements for three targets: {IFI27}, {JUP} and {OASL}. We generated this dataset by assaying different concentrations of synthetic \glsxtrshort{rna} templates corresponding to subsequences of the full-length target sequence of the three different targets. To test the effects of varying different primer properties on \gls{qrtlamp} performance, we varied FIP and BIP primer sequences of each target. These sequence alterations consisted of variations in the lengths of annealing sequence for either the F1c (B1c) or F2 (B2) subsequences of the FIP (BIP) primer (Figure~\ref{fig:lampoverview}). F3, B3, LF, and LB primer sequences were not varied. For each target/primer set combination, we collected \gls{qrtlamp} measurements at three \glsxtrshort{rna} concentrations ($10^1$, $10^3$, and $10^5$ copies/$\mu$L; 20$\mu$L per reaction), with at least two replicates per concentration. We investigated effects of changes in FIP/BIP primer sequence in 35, 48 and 63 primer combinations for {IFI27}, {JUP}, and {OASL} respectively. Reaction conditions for \gls{qrtlamp} with \gls{ivt} \glsxtrshort{rna} templates were identical to those used for the clinical samples. Replicate samples were dispensed along with primers and reagents and run on a 384-well plate with the QuantStudio\texttrademark~5 instrument. For the IVT samples, we tracked fluorescence for 30 minutes or 90 pseudo-cycles.
 
@@ -97,12 +97,20 @@ Set $n^* = n$. \\
 \subsection{Single-target model \label{sec:singletargetmodel}}
 To investigate the effects of \glsxtrshort{rna} abundance on \gls{qrtlamp} amplification curves for individual targets, we model the Gompertz curve parameter estimates produced by our nonlinear fitting procedure. For samples $i = 1, \dots, N$, replicates $j = 1, \dots, J$, with \gls{ns}-measured gene expression $x_i$ (a proxy for true \glsxtrshort{rna} input in clinical samples), we model estimated parameters for rate ($\hat{b}_{ij}^{\text{gomp}}$) and cycle offset ($\hat{c}_{ij}^{\text{gomp}}$) of an individual target as realisations of independent random variables $\hat{B}_{ij}$ and $\hat{C}_{ij}$ distributed according to:
 \begin{align} 
-    \hat{B}_{ij} & \sim \textsf{Student-t}(\mu_B + \lambda_B x_i + \rho_B \hat{h}^{\text{gomp}}_i, \ \nu_B, \ \sigma_B ) \label{eq:bsm}\\
-    \hat{C}_{ij} & \sim \textsf{Student-t}(\mu_C + \lambda_C x_i + \rho_C \hat{h}^{\text{gomp}}_i, \ \nu_C, \ \sigma_C). \label{eq:csm}
+    \hat{B}_{ij} & \sim \textsf{Skew-Normal}(\mu_B + \lambda_B x_i + \rho_B \hat{h}^{\text{gomp}}_i, \ \alpha_B, \ \sigma_B ) \label{eq:bsm}\\
+    \hat{C}_{ij} & \sim \textsf{Skew-Normal}(\mu_C + \lambda_C x_i + \rho_C \hat{h}^{\text{gomp}}_i, \ \alpha_C, \ \sigma_C). \label{eq:csm}
 \end{align}
-We use a $\textsf{Student-t}(\mu,\nu,\sigma)$ likelihood to provide robustness to outliers, with $\mu$, $\nu$, and $\sigma$ corresponding to the location, degrees of freedom and scale of the distribution respectively. We refer to $\lambda_B$ and $\lambda_C$ as resolution parameters since a larger absolute value of $\lambda_B$ or $\lambda_C$ would reflect greater sensitivity, on average, to changes in \glsxtrshort{rna} input for a given target.
+\Gls{pgm} plate diagrams for these models are given in Figure~\ref{fig:stm_pgms}. We use a $\textsf{Skew-Normal}(\mu,\alpha,\sigma)$ likelihood to provide robustness to outliers while allowing for observed asymmetry in responses, with $\mu$, $\alpha$, and $\sigma$ corresponding to the location, shape, and scale of the distribution respectively. We refer to $\lambda_B$ and $\lambda_C$ as resolution parameters since a larger absolute value of $\lambda_B$ or $\lambda_C$ would reflect greater sensitivity, on average, to changes in \glsxtrshort{rna} input for a given target.
+Note that these properties are with respect to absolute changes in \glsxtrshort{rna} input, not changes in \glsxtrshort{rna} input relative to the overall variation of a given target. We are therefore specifically attempting to measure \gls{lamp}'s technical performance measuring a biochemical target, not the total discriminatory power of the range of a targets' expression. When, for example, selecting targets for a diagnostic test, other considerations such as clinical significance and variation in expression will have to be weighed against technical resolution of the assay.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=.45\textwidth]{figures/chapter2/LAMP_STM_B_PGM.png} \includegraphics[width=.45\textwidth]{figures/chapter2/LAMP_STM_C_PGM.png}
+    \caption{PGM plate diagrams for single-target models of $\hat{B}$ (left) and $\hat{C}$ (right).}
+    \label{fig:stm_pgms}
+\end{figure}
 %$\lambda_B$ represents the rate of fluorescence increase, similar to the efficiency for \gls{pcr} reactions~\citep{svec_how_2015}. Similarly, $\lambda_C$ is comparable to the $C_{t}$ (time-to-threshold) measure of gene expression found in \gls{pcr}. 
-The input $\hat{h}^{\text{gomp}}_{i}$ is the geometric mean of the values $\hat{c}_{ijk}^{\text{gomp}}$ across all replicates $j$ and all housekeeper genes  $k \in$ \{KPNA6, RREB1, YWHAB\}, included to normalize for sample-to-sample variation in \glsxtrshort{rna} yield. The parameters $\sigma_B$ and $\sigma_C$ capture variation in rate and cycle offset that is not attributable to variation in \glsxtrshort{rna} input. Bayesian inference is performed with the R package \texttt{brms}~\citep{burkner_brms_2017}. We specify priors as follows: for the rate model (eq.~\ref{eq:bsm}) -- $\mu_B \sim \mathcal{N}(1, 1^2)$, $\lambda_B \sim \mathcal{N}(0, 2^2)$, $\rho_B \sim \mathcal{N}(0, 2^2)$, $\nu \sim \Gamma(2,0.1)$, $\sigma_B \sim \textsf{Student-t}(3, 0, 2.5^2)$; for the cycle offset model (eq.~\ref{eq:csm}), we use matching priors save that $\mu_C \sim \mathcal{N}(23, 5^2)$. We approximate model posteriors with 4000 samples (1000 warm-up) from 3 \gls{hmc} chains, assessed for convergence with all parameter posteriors achieving $\hat{R} \leq 1.01$ and bulk and tail effective sample sizes above 1000.
+The input $\hat{h}^{\text{gomp}}_{i}$ is the geometric mean of the values $\hat{c}_{ijk}^{\text{gomp}}$ across all replicates $j$ and all housekeeping genes  $k \in$ \{KPNA6, RREB1, YWHAB\}, included to normalize for sample-to-sample variation in \glsxtrshort{rna} yield. The parameters $\sigma_B$ and $\sigma_C$ capture variation in rate and cycle offset that is not attributable to variation in \glsxtrshort{rna} input. Bayesian inference is performed with the R package \texttt{brms}~\citep{burkner_brms_2017}. We specify priors as follows. For the rate model (eq.~\ref{eq:bsm}): $\mu_B \sim \mathcal{N}(0.5, 0.5^2)$, $\lambda_B \sim \mathcal{N}(0, 0.1^2)$, $\rho_B \sim \mathcal{N}(0, 0.1^2)$, $\alpha_B \sim \mathcal{N}(0,4^2)$, $\sigma_B \sim \textsf{Student-t}(3, 0, 2.5^2)$; for the cycle offset model (eq.~\ref{eq:csm}): $\mu_C \sim \mathcal{N}(30, 5^2), \lambda_C \sim \mathcal{N}(0, 1^2), \rho_C \sim \mathcal{N}(0, 1^2)$, and identical priors to the rate model for $\alpha_C,\sigma_C$. We approximate model posteriors with 4000 samples (1000 warm-up) from 3 \gls{hmc} chains, assessed for convergence with all parameter posteriors achieving $\hat{R} \leq 1.01$ and bulk and tail effective sample sizes above 1000.
 
 \subsection{Multi-target model \label{sec:hierarchicalmodel}}
 To evaluate associations between primer/target properties and assay resolution, and to model \gls{qrtlamp} amplification curves across all targets, we propose hierarchical models of the estimated rate and cycle offset. We derive an estimates of the  rate $\hat{b}^{\text{gomp}}_{ijkl}$ and offset $\hat{c}^{\text{gomp}}_{ijkl}$ for sample $i$, replicate $j$, target $k$, and (in the case of \gls{ivt}  \glsxtrshort{rna} templates) primer set $l$ from our non-linear least squares fitting procedure. We then model each of the $\hat{b}^{\text{gomp}}_{ijkl}$ and $\hat{c}^{\text{gomp}}_{ijkl}$ as being independent realisations of random variables $\hat{B}_{ijkl}$, $\hat{C}_{ijkl}$, where: 
@@ -117,7 +125,7 @@ Here, for each model the location of the likelihood comprises \glsxtrshort{rna}-
 \end{eqnarray}
 This random term models target-specific effects unrelated to assay characteristics. Our models of baseline offset in clinical samples did not have slopes ($\beta_{z}$) varying by target as we had only one primer set per target. 
 
-For our \gls{ivt} \glsxtrshort{rna} dataset, we note that: \emph{a)} $x_{i}$ represents the log \glsxtrshort{rna} copy number at concentration $i$, and \emph{b)} we drop the housekeeper term ($\rho\hat{h}^{\text{gomp}}_{i}$) as input \glsxtrshort{rna} concentrations are known. For both our \gls{ivt}  \glsxtrshort{rna} and clinical data, we use $\lambda$ to model effects of assay features on (RNA-dependent) assay resolution (e.g. $\lambda(\bm{z}_{kl}; \gamma) = \gamma_{0} + \gamma_{L_{\text{stem}}} L_{\text{stem},k,l}$).
+For our \gls{ivt} \glsxtrshort{rna} dataset, we note that: \emph{a)} $x_{i}$ represents the log \glsxtrshort{rna} copy number at concentration $i$, and \emph{b)} we drop the housekeeping term ($\rho\hat{h}^{\text{gomp}}_{i}$) as input \glsxtrshort{rna} concentrations are known. For both our \gls{ivt}  \glsxtrshort{rna} and clinical data, we use $\lambda$ to model effects of assay features on (RNA-dependent) assay resolution (e.g. $\lambda(\bm{z}_{kl}; \gamma) = \gamma_{0} + \gamma_{L_{\text{stem}}} L_{\text{stem},k,l}$).
 
 For analysis of our \gls{ivt} \glsxtrshort{rna} dataset, we specify two types of models, which we refer to as \emph{across-target} and \emph{within-target} models respectively. 
 % The first model type, \emph{across-target}, is similar to the multi-target model used for clinical samples (Equation~\ref{eq:chm}) except that 
@@ -128,16 +136,26 @@ The form of the resolution function $\lambda$ for our \emph{across-target} model
 \gamma_{0,k} &\sim&  \mathcal{N}(\mu_{\gamma_{0}}, \sigma^{2}_{\gamma_{0}}).    
 \end{eqnarray}
 %For both ``global'' parameters such as $\gamma_0$ and $\gamma_{L_s^{\text{amp}}}$ and hierarchical parameters such as $\mu_\gamma$ we used \text{Student-t}s, such that for example $\gamma_0 \sim \textsf{Student-t}(\mu_{\gamma_0}, \nu_{\gamma_0}, \sigma_{\gamma_0})$.
-When the $\lambda$ function parameter $\bm{\gamma}$ is a ``global'' parameter (i.e. not specified as a hierarchical term), we specify independent $\mathcal{N}(0,2^2)$ priors for its component parameters. When $\bm{\gamma}$ includes hierarchical terms for the intercept, we specify priors $\mu_{\gamma_{0}} \sim \mathcal{N}(0, 2^2)$, $\sigma_{\gamma_{0}} \sim \textsf{Student-t}(3, 0, 2.5^2)$. Priors for the baseline offset parameters $\bm{\beta}$ are set similarly, aside from the intercept term $\beta_0$: $\mu_{\beta_0} \sim \mathcal{N}(1, 1^2)$ for our rate model and $\mu_{\beta_0} \sim \mathcal{N}(23, 5^2)$ for our cycle offset model. In each case the parameters $\nu$ and $\sigma$ are given priors $\nu \sim \Gamma (2, 0.1), \sigma \sim \textsf{Student-t}(3, 0, 2.5^2)$.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=.45\textwidth]{figures/chapter2/LAMP_ATM_B_PGM.png} \includegraphics[width=.45\textwidth]{figures/chapter2/LAMP_ATM_C_PGM.png} \\
+    \vspace{10pt}
+    \includegraphics[width=.45\textwidth]{figures/chapter2/LAMP_WTM_B_PGM.png} \includegraphics[width=.45\textwidth]{figures/chapter2/LAMP_WTM_C_PGM.png}
+    \caption{PGM plate diagrams for $\hat{B}$ (left) and $\hat{C}$ (right). Specifications are given for multi-target models with across-target resolution functions above and within-target resolution functions below.}
+    \label{fig:mtm_pgms}
+\end{figure}
+
+We give \gls{pgm} plate diagrams for both across- and within-target models for $\hat{B}$ and $\hat{C}$ in Figure~\ref{fig:mtm_pgms}. When the $\lambda$ function parameter $\bm{\gamma}$ is a ``global'' parameter (i.e. not specified as a hierarchical term), we specify independent $\mathcal{N}(0,2^2)$ priors for its component parameters. When $\bm{\gamma}$ includes hierarchical terms for the intercept, we specify priors $\mu_{\gamma_{0}} \sim \mathcal{N}(0, 2^2)$, $\sigma_{\gamma_{0}} \sim \textsf{Student-t}(3, 0, 2.5^2)$. Priors for the baseline offset parameters $\bm{\beta}$ are set similarly, aside from the intercept term $\beta_0$: $\mu_{\beta_0} \sim \mathcal{N}(1, 1^2)$ for our rate model and $\mu_{\beta_0} \sim \mathcal{N}(23, 5^2)$ for our cycle offset model. In each case the parameters $\nu$ and $\sigma$ are given priors $\nu \sim \Gamma (2, 0.1), \sigma \sim \textsf{Student-t}(3, 0, 2.5^2)$.
 For multi-target model parameter inference, we use 3 \gls{hmc} chains of 4000 samples (1000 warm-up), again assessing convergence by confirming that all chains have $\hat{R} \leq 1.01$ and effective bulk and tail sample sizes above 1000.
 
 \subsection{Properties of primers and targets \label{sec:freeenergy}}
 Multiple properties are known to impact effectiveness of \gls{lamp} primers, including melting temperature, GC content and GG repeat abundance~\citep{eiken_primerexplorer_2019}. In practice, many of these properties are tightly controlled in primer design workflows, resulting in little variability with respect to these quantities. We therefore focused on three classes of \gls{lamp} properties: \emph{a)} sequence features of the \gls{lamp} target or amplicon; \emph{b)} thermodynamic properties of primers and their targets; and \emph{c)} measures of primer sequence complexity. The full list of properties appears in Table~\ref{tab:properties}. 
 \begin{table}[!t] 
 \centering
-{\begin{tabular}{|l|cc|}
-\hline Property & Symbol &
-Unit  \\\hline
+{\begin{tabular}{ccc}
+\hline \textbf{Property} & \textbf{Symbol} &
+\textbf{Unit}  \\\hline
 Amplicon stem length & $L_s^{\text{amp}}$ & bp  \\
 Amplicon loop length & $L_l^{\text{amp}}$ & bp  \\
 Amplicon GC Content & $GC^{\text{amp}}$ & -  \\
@@ -169,89 +187,164 @@ In traditional model stacking, predictions from multiple models are ensembled vi
 \section{Results \label{sec:results}}
 
 \subsection{RNA dependence for qRT-LAMP cycle offset and amplification rate varies widely between targets\label{sec:sensitivityprecision}}
-Our first aim was to infer the resolution ($\lambda_B, \lambda_C$) and precision ($\sigma_{B}$, $\sigma_{C}$) parameters associated with \glsxtrshort{rna} input's effect on \gls{qrtlamp} curve characteristics in clinical samples. We used our single-target models (Equations~\ref{eq:bsm}~and~\ref{eq:csm}, Section~\ref{sec:singletargetmodel}) to decompose variation in cycle offset ($\hat{c}_{ij}$; median (across all targets) -- $22.2$, IQR (across all targets) -- $5.03$) and rate ($\hat{b}_{ij}$; median (across all targets) -- $0.334$, IQR (across all targets) -- $0.076$) into separate \glsxtrshort{rna}-dependent and \glsxtrshort{rna}-independent components. We fitted these models for each of our 25 targets of interest. Summaries of the posterior distributions for rate and cycle offset parameters appear in Tables~\ref{tab:single_target_sens_prec_c}~and~\ref{tab:single_target_sens_prec_b}. 
+Our first aim was to infer the resolution ($\lambda_B, \lambda_C$) and precision ($\sigma_{B}$, $\sigma_{C}$) parameters associated with \glsxtrshort{rna} input's effect on \gls{qrtlamp} curve characteristics in clinical samples. We used our single-target models (Equations~\ref{eq:bsm}~and~\ref{eq:csm}, Section~\ref{sec:singletargetmodel}) to decompose variation in cycle offset ($\hat{c}_{ij}$; median $22.2$ across all targets, \gls{iqr} $5.03$ across all targets) and rate ($\hat{b}_{ij}$; median $0.334$ across all targets, \gls{iqr} $0.076$ across all targets) into separate \glsxtrshort{rna}-dependent and \glsxtrshort{rna}-independent components. We fitted these models for each of our 25 targets of interest. Summaries of the posterior distributions for rate and cycle offset parameters appear in Tables~\ref{tab:single_target_offset_models_summary}~and~\ref{tab:single_target_rate_models_summary}. 
 
-We see a wide range of inferred posterior means for both $\lambda_C$ and $\sigma_C$. For the parameter $\lambda_C$, which denotes resolution with respect to cycle offset, larger negative values correspond to improved resolution. Offset precision $\sigma_C$ is always positive, with lower values corresponding to a more precise assay. For example, targets {CTSL1} and {ZDHHC19} both show good resolution (posterior means of $-1.94$ and $-2.58$, 95\% credible intervals of (-2.16, -1.71) and (-2.95, -2.25), respectively), but different levels of precision (posterior means of $1.30$ and $2.85$, 95\% credible intervals of (1.07, 1.53) and (2.10, 3.70), respectively). Inferences of poor resolution and precision for some targets (e.g. {KIAA1370}) indicate the potential need for further optimization of assay properties and/or conditions. We also note that, as expected and as reflected by the posteriors for $\rho_C$, the geometric mean of the housekeeper cycle offsets is generally correlated with the cycle offset of the target (i.e., lower sample yield should correspond to higher cycle offsets for all targets). 
+We see a wide range of inferred posterior means for both $\lambda_C$ and $\sigma_C$. For the parameter $\lambda_C$, which denotes resolution with respect to cycle offset, larger negative values correspond to improved resolution, and suggest that for a given change in RNA input a larger average change in amplification curve cycle offset will be observed. Offset precision $\sigma_C$ is always positive, with lower values corresponding to a more precise assay (i.e. less variation in amplification curve cycle offset between samples of the same RNA input). For example, targets {CTSL1} and {ZDHHC19} both show good resolution (posterior means of $-1.86$ and $-2.20$, 95\% credible intervals of (-2.09, -1.64) and (-2.59, -1.81), respectively), but different levels of precision (posterior means of $1.57$ and $6.15$, 95\% credible intervals of (1.42, 1.74) and (5.57, 6.80), respectively). Inferences of poor resolution and precision for some targets (e.g. {KIAA1370}) indicate the potential need for further optimization of assay properties and/or conditions. We also note that, as expected and as reflected by the posteriors for $\rho_C$, the geometric mean of the housekeeping cycle offsets is generally correlated with the cycle offset of the target (i.e., lower sample yield should correspond to higher cycle offsets for all targets). 
 
-The amplification rate parameter $\lambda_B$ also varied between targets, with a larger positive value indicating greater average sensitivity to changes in \glsxtrshort{rna} input. While many reactions, including for example {ISG15} and {HK3}, showed almost no detectable variation in rate due to \glsxtrshort{rna} input (posterior mean for $\lambda_B$ of 0.00, 95\% credible intervals of (0.00, 0.00) in both cases), others such as {PER1} and {ZDHHC19} did show a dependence on \gls{ns}-derived measurements of \glsxtrshort{rna} (posterior means for $\lambda_B$ of 0.04 in both cases, 95\% credible intervals of (0.03, 0.05) and (0.04, 0.05) respectively). Posterior summaries for the precision in amplification rate ($\sigma_{B}$) were roughly similar across targets. We also found that housekeeper levels showed a negative association with the rate of amplification (for example, 95\% posterior credible intervals for $\rho_B$ of (-0.03, -0.02) in ARG1 and (-0.02, -0.01) in BATF).
+The amplification rate parameter $\lambda_B$ also varied between targets, with a larger positive value indicating greater average sensitivity to changes in \glsxtrshort{rna} input. While some reactions, including for example {CD163} and {RAPGEF}, showed almost no detectable variation in rate due to \glsxtrshort{rna} input (posterior mean for $\lambda_B$ of 0.00, 95\% credible intervals of (0.00, 0.01) in both cases), others such as {PER1} and {ZDHHC19} did show a dependence on \gls{ns}-derived measurements of \glsxtrshort{rna} (posterior means for $\lambda_B$ of 0.04 in both cases, 95\% credible intervals of (0.03, 0.05) and (0.04, 0.04) respectively). Posterior summaries for the precision in amplification rate ($\sigma_{B}$) were roughly similar across targets. We also found that housekeeping levels showed a negative association with the rate of amplification (for example, 95\% posterior credible intervals for $\rho_B$ of (-0.03, -0.02) in ARG1 and (-0.02, -0.01) in BATF).
 
-\begin{table}[!t]
+
+
+\begin{table}[ht]
 \centering
- {\begin{tabular}{|l|lll|}
-\hline
-Target &  $\lambda_C$ & $\sigma_C$ & $\rho_C$  \\
-\hline
-ARG1 &  -0.77 (-0.84,  -0.71) & 0.61 (0.50,  0.74) & 1.18 (1.05,  1.30) \\ 
-BATF  &  -1.14 (-1.31,  -0.97) & 0.68 (0.59,  0.77) & 0.88 (0.78,  0.99) \\ 
-C3AR1  &  -0.87 (-0.97,  -0.77) & 0.56 (0.46,  0.68) & 0.59 (0.49,  0.69) \\ 
-C9orf95 &  -0.74 (-0.99,  -0.49) & 0.85 (0.74,  0.98) & 0.55 (0.42,  0.68) \\  
-CD163 &  -0.62 (-0.70,  -0.55) & 0.43 (0.35,  0.50) & 0.40 (0.33,  0.47) \\ 
-CEACAM1 &  -0.68 (-0.78,  -0.59) & 0.88 (0.74,  1.01) & 0.54 (0.40, 0.68) \\ 
-CTSL1 &  -1.94 (-2.16,  -1.71) & 1.30 (1.07,  1.53) & 1.14 (0.95,  1.34) \\ 
-GADD45A &  -0.75 (-0.90,  -0.61) & 0.96 (0.75,  1.14) & 0.32 (0.17,  0.47) \\ 
-GNA15 &  -0.82 (-1.02,  -0.62) & 0.62 (0.54,  0.71) & 0.97 (0.87,  1.06) \\ 
-HK3 &  -0.74 (-0.81,  -0.66) & 0.41 (0.36,  0.46) & 0.72 (0.66, 0.78) \\ 
-HLA-DMB &  -0.81 (-1.36,  -0.25) & 3.13 (2.79,  3.53) & 0.73 (0.37, 1.08) \\ 
-IFI27 &  -0.94 (-1.05, -0.83) & 1.80 (1.51,  2.12) & 0.66 (0.42,  0.90) \\ 
-ISG15 &  -0.82 (-0.95,  -0.68) & 1.62 (1.37,  1.90) & 0.91 (0.69, 1.14) \\ 
-JUP &  -1.49 (-1.73,  -1.24) & 2.36 (2.04,  2.69) & 1.50 (1.20,  1.81) \\ 
-KCNJ2 &  -0.77 (-0.90,  -0.65) & 0.52 (0.41,  0.66) & 0.14 (0.05, 0.24) \\ 
-KIAA1370 &  -0.25 (-0.50,  -0.00) & 0.74 (0.60,  0.89) & 0.45 (0.32,  0.57) \\ 
-LY86 &  -0.82 (-0.98,  -0.66) & 0.55 (0.45,  0.64) & 0.88 (0.80, 0.97) \\ 
-OASL &  -0.89 (-0.96,  -0.81) & 0.65 (0.53,  0.78) & 0.87 (0.75, 0.99) \\ 
-OLFM4 &  -1.07 (-1.19,  -0.95) & 1.50 (1.31,  1.71) & 0.56 (0.35,  0.78) \\ 
-PDE4B &  -0.90 (-1.26,  -0.53) & 1.32 (1.17,  1.49) & 0.99 (0.80,  1.18) \\ 
-PER1 &  -1.41 (-1.78,  -1.05) & 2.07 (1.72,  2.45) & 0.61 (0.32,  0.89) \\ 
-PSMB9 &  -0.88 (-1.02,  -0.74) & 0.51 (0.41,  0.62) & 0.86 (0.77,  0.94) \\ 
-RAPGEF1 &  -0.88 (-1.36,  -0.40) & 1.26 (1.02,  1.51) & 0.97 (0.75,  1.17) \\ 
-TGFBI &  -0.66 (-0.75,  -0.58) & 0.53 (0.45,  0.62) & 0.85 (0.76,  0.94) \\ 
-ZDHHC19 &  -2.58 (-2.95,  -2.25) & 2.85 (2.10,  3.70) & 1.32 (0.96,  1.69) \\ 
-\hline
-\end{tabular}}
-\caption{Posterior mean estimates of cycle offset resolution, precision and housekeeper normalization parameters for single-target models based on each target (values in brackets = 95\% credible intervals).\label{tab:single_target_sens_prec_c}}
+\begin{tabular}{cccc}
+  \hline
+{\textbf{Target}} & $\bm{\lambda_C}$ & $\bm{\sigma_C}$ & $\bm{\rho_C}$ \\ 
+  \hline
+ARG1 & -0.71 (-0.78, -0.65) & 1.14 (1.02, 1.26) & 1.14 (1.02, 1.26) \\ 
+  BATF & -1.02 (-1.16, -0.88) & 0.73 (0.66, 0.81) & 0.78 (0.70, 0.86) \\ 
+  C3AR1 & -0.90 (-1.00, -0.79) & 0.88 (0.79, 0.97) & 0.54 (0.43, 0.65) \\ 
+  C9orf95 & -0.64 (-0.85, -0.44) & 0.86 (0.78, 0.96) & 0.51 (0.41, 0.60) \\ 
+  CD163 & -0.61 (-0.68, -0.53) & 0.51 (0.46, 0.56) & 0.36 (0.30, 0.43) \\ 
+  CEACAM1 & -0.64 (-0.73, -0.56) & 0.97 (0.88, 1.08) & 0.42 (0.31, 0.54) \\ 
+  CTSL1 & -1.86 (-2.09, -1.64) & 1.57 (1.42, 1.74) & 1.03 (0.86, 1.21) \\ 
+  GADD45A & -0.68 (-0.80, -0.56) & 1.03 (0.94, 1.15) & 0.29 (0.17, 0.40) \\ 
+  GNA15 & -0.77 (-0.93, -0.61) & 0.67 (0.60, 0.73) & 0.95 (0.85, 1.04) \\ 
+  HK3 & -0.70 (-0.76, -0.63) & 0.44 (0.40, 0.49) & 0.71 (0.66, 0.76) \\ 
+  HLA-DMB & -0.95 (-1.41, -0.51) & 3.25 (2.94, 3.61) & 0.67 (0.35, 0.98) \\ 
+  IFI27 & -0.91 (-1.01, -0.80) & 2.10 (1.89, 2.34) & 0.69 (0.48, 0.89) \\ 
+  ISG15 & -0.97 (-1.06, -0.87) & 2.10 (1.89, 2.34) & 0.84 (0.63, 1.06) \\ 
+  JUP & -1.57 (-1.78, -1.36) & 2.43 (2.20, 2.69) & 1.51 (1.25, 1.77) \\ 
+  KCNJ2 & -0.70 (-0.81, -0.60) & 0.75 (0.68, 0.83) & 0.18 (0.09, 0.27) \\ 
+  KIAA1370 & -0.34 (-0.57, -0.10) & 0.99 (0.89, 1.10) & 0.42 (0.31, 0.53) \\ 
+  LY86 & -0.71 (-0.85, -0.58) & 0.66 (0.60, 0.74) & 0.78 (0.70, 0.86) \\ 
+  OASL & -0.83 (-0.91, -0.76) & 0.89 (0.80, 0.99) & 0.83 (0.74, 0.93) \\ 
+  OLFM4 & -1.01 (-1.12, -0.90) & 1.58 (1.43, 1.77) & 0.52 (0.35, 0.68) \\ 
+  PDE4B & -0.95 (-1.21, -0.69) & 1.35 (1.23, 1.49) & 0.90 (0.74, 1.05) \\ 
+  PER1 & -1.41 (-1.74, -1.10) & 2.61 (2.36, 2.88) & 0.39 (0.20, 0.58) \\ 
+  PSMB9 & -0.94 (-1.06, -0.83) & 0.66 (0.60, 0.73) & 0.88 (0.79, 0.96) \\ 
+  RAPGEF1 & -0.60 (-0.95, -0.26) & 1.79 (1.62, 1.98) & 0.68 (0.51, 0.86) \\ 
+  TGFBI & -0.71 (-0.79, -0.63) & 0.58 (0.53, 0.65) & 0.79 (0.72, 0.87) \\ 
+  ZDHHC19 & -2.20 (-2.59, -1.81) & 6.15 (5.57, 6.80) & 0.89 (0.53, 1.26) \\ 
+   \hline
+\end{tabular}
+\caption{Posterior mean estimates of cycle offset resolution, precision and housekeeping normalization parameters for single-target models based on each target (values in brackets = 95\% credible intervals). \label{tab:single_target_offset_models_summary}} 
 \end{table}
 
-\begin{table}[!t]
+
+% \begin{table}[!t]
+% \centering
+%  {\begin{tabular}{|l|lll|}
+% \hline
+% Target &  $\lambda_C$ & $\sigma_C$ & $\rho_C$  \\
+% \hline
+% ARG1 &  -0.77 (-0.84,  -0.71) & 0.61 (0.50,  0.74) & 1.18 (1.05,  1.30) \\ 
+% BATF  &  -1.14 (-1.31,  -0.97) & 0.68 (0.59,  0.77) & 0.88 (0.78,  0.99) \\ 
+% C3AR1  &  -0.87 (-0.97,  -0.77) & 0.56 (0.46,  0.68) & 0.59 (0.49,  0.69) \\ 
+% C9orf95 &  -0.74 (-0.99,  -0.49) & 0.85 (0.74,  0.98) & 0.55 (0.42,  0.68) \\  
+% CD163 &  -0.62 (-0.70,  -0.55) & 0.43 (0.35,  0.50) & 0.40 (0.33,  0.47) \\ 
+% CEACAM1 &  -0.68 (-0.78,  -0.59) & 0.88 (0.74,  1.01) & 0.54 (0.40, 0.68) \\ 
+% CTSL1 &  -1.94 (-2.16,  -1.71) & 1.30 (1.07,  1.53) & 1.14 (0.95,  1.34) \\ 
+% GADD45A &  -0.75 (-0.90,  -0.61) & 0.96 (0.75,  1.14) & 0.32 (0.17,  0.47) \\ 
+% GNA15 &  -0.82 (-1.02,  -0.62) & 0.62 (0.54,  0.71) & 0.97 (0.87,  1.06) \\ 
+% HK3 &  -0.74 (-0.81,  -0.66) & 0.41 (0.36,  0.46) & 0.72 (0.66, 0.78) \\ 
+% HLA-DMB &  -0.81 (-1.36,  -0.25) & 3.13 (2.79,  3.53) & 0.73 (0.37, 1.08) \\ 
+% IFI27 &  -0.94 (-1.05, -0.83) & 1.80 (1.51,  2.12) & 0.66 (0.42,  0.90) \\ 
+% ISG15 &  -0.82 (-0.95,  -0.68) & 1.62 (1.37,  1.90) & 0.91 (0.69, 1.14) \\ 
+% JUP &  -1.49 (-1.73,  -1.24) & 2.36 (2.04,  2.69) & 1.50 (1.20,  1.81) \\ 
+% KCNJ2 &  -0.77 (-0.90,  -0.65) & 0.52 (0.41,  0.66) & 0.14 (0.05, 0.24) \\ 
+% KIAA1370 &  -0.25 (-0.50,  -0.00) & 0.74 (0.60,  0.89) & 0.45 (0.32,  0.57) \\ 
+% LY86 &  -0.82 (-0.98,  -0.66) & 0.55 (0.45,  0.64) & 0.88 (0.80, 0.97) \\ 
+% OASL &  -0.89 (-0.96,  -0.81) & 0.65 (0.53,  0.78) & 0.87 (0.75, 0.99) \\ 
+% OLFM4 &  -1.07 (-1.19,  -0.95) & 1.50 (1.31,  1.71) & 0.56 (0.35,  0.78) \\ 
+% PDE4B &  -0.90 (-1.26,  -0.53) & 1.32 (1.17,  1.49) & 0.99 (0.80,  1.18) \\ 
+% PER1 &  -1.41 (-1.78,  -1.05) & 2.07 (1.72,  2.45) & 0.61 (0.32,  0.89) \\ 
+% PSMB9 &  -0.88 (-1.02,  -0.74) & 0.51 (0.41,  0.62) & 0.86 (0.77,  0.94) \\ 
+% RAPGEF1 &  -0.88 (-1.36,  -0.40) & 1.26 (1.02,  1.51) & 0.97 (0.75,  1.17) \\ 
+% TGFBI &  -0.66 (-0.75,  -0.58) & 0.53 (0.45,  0.62) & 0.85 (0.76,  0.94) \\ 
+% ZDHHC19 &  -2.58 (-2.95,  -2.25) & 2.85 (2.10,  3.70) & 1.32 (0.96,  1.69) \\ 
+% \hline
+% \end{tabular}}
+% \caption{Posterior mean estimates of cycle offset resolution, precision and housekeeping normalization parameters for single-target models based on each target (values in brackets = 95\% credible intervals).\label{tab:single_target_rate_models_summary}}
+% \end{table}
+
+\begin{table}[ht]
 \centering
- {\begin{tabular}{|l|lll|}
-\hline
-Target &  $\lambda_B$ & $\sigma_B$ & $\rho_B$  \\
-\hline
-ARG1 & 0.02 (0.02, 0.02) & 0.03 (0.02, 0.03) & -0.03 (-0.03, -0.02) \\
-BATF & 0.03 (0.02, 0.03) & 0.02 (0.02, 0.03) & -0.02 (-0.02, -0.01) \\
-C3AR1 & 0.02 (0.02, 0.02) & 0.02 (0.02, 0.02) & -0.01 (-0.02, -0.01) \\ 
-C9orf95 & 0.02 (0.01, 0.03) & 0.02 (0.02, 0.03) & -0.01 (-0.02, -0.01) \\ 
-CD163 & 0.00 (0.00, 0.01) & 0.02 (0.02, 0.02) & -0.01 (-0.01, -0.01) \\ 
-CEACAM1 & 0.00 (0.00, 0.01) & 0.02 (0.02, 0.02) & -0.01 (-0.02, -0.01) \\ 
-CTSL1 & 0.03 (0.02, 0.03) & 0.03 (0.02, 0.03) & -0.01 (-0.02, -0.01) \\ 
-GADD45A & 0.02 (0.01, 0.02) & 0.02 (0.02, 0.03) & -0.02 (-0.02, -0.01) \\ 
-GNA15 & 0.01 (0.00, 0.02) & 0.02 (0.01, 0.02) & -0.02 (-0.02, -0.01) \\ 
-HK3 & 0.00  (0.00, 0.00) & 0.02 (0.02, 0.02) & -0.01 (-0.02, -0.01) \\ 
-HLA-DMB & 0.01 (0.00, 0.01) & 0.03 (0.03, 0.03) & -0.01 (-0.01, -0.01) \\ 
-IFI27 & 0.01 (0.00, 0.01) & 0.02 (0.02, 0.02) & -0.01 (-0.01, 0.00) \\ 
-ISG15 & 0.00  (0.00, 0.01) & 0.02 (0.02, 0.02) & -0.01 (-0.02, -0.01) \\ 
-JUP & 0.02 (0.02, 0.02) & 0.03 (0.02, 0.03) & -0.02 (-0.02, -0.01) \\ 
-KCNJ2 & 0.00  (0.00, 0.00) & 0.01 (0.01, 0.02) & -0.01 (-0.01, 0.00) \\ 
-KIAA1370 & 0.01 (0.00, 0.02) & 0.03 (0.03, 0.04) & -0.01 (-0.02, -0.01) \\ 
-LY86 & 0.02 (0.01, 0.02) & 0.02 (0.01, 0.02) & -0.02 (-0.02, -0.01) \\ 
-OASL & 0.01 (0.01, 0.02) & 0.02 (0.02, 0.02) & -0.02 (-0.02, -0.01) \\ 
-OLFM4 & 0.01 (0.01, 0.02) & 0.03 (0.03, 0.04) & -0.01 (-0.01, 0.00) \\ 
-PDE4B & 0.01 (0.00, 0.02) & 0.02 (0.02, 0,02) & -0.01 (-0.02, -0.01) \\ 
-PER1 & 0.04 (0.03, 0.05) & 0.05 (0.04, 0.06) & -0.01 (-0.02, -0.01) \\ 
-PSMB9 & 0.01 (0.00, 0.01) & 0.01 (0.01, 0.02) & -0.01 (-0.02, -0.01) \\ 
-RAPGEF1 & 0.00  (0.00, 0.01) & 0.02 (0.02, 0.02) & -0.02 (-0.02, -0.01)\\ 
-TGFBI & 0.01 (0.00, 0.01) & 0.02 (0.01, 0.02) & -0.01 (-0.02, -0.01) \\ 
-ZDHHC19 & 0.04 (0.04, 0.05) & 0.04 (0.04, 0.05) & -0.02 (-0.02, -0.01) \\ 
-\hline
-\end{tabular}}
-\caption{Posterior mean estimates of rate resolution, precision and housekeeper normalization parameters for single-target models based on each target (values in brackets = 95\% credible intervals).\label{tab:single_target_sens_prec_b}}
+\begin{tabular}{cccc}
+  \hline
+{\textbf{Target}} & $\bm{\lambda_B}$ & $\bm{\sigma_B}$ & $\bm{\rho_B}$ \\ 
+  \hline
+ARG1 & 0.02 (0.02, 0.02) & 0.03 (0.03, 0.03) & -0.03 (-0.03, -0.03) \\ 
+  BATF & 0.03 (0.02, 0.03) & 0.03 (0.03, 0.03) & -0.02 (-0.02, -0.01) \\ 
+  C3AR1 & 0.02 (0.02, 0.02) & 0.02 (0.02, 0.03) & -0.01 (-0.02, -0.01) \\ 
+  C9orf95 & 0.02 (0.01, 0.02) & 0.03 (0.02, 0.03) & -0.01 (-0.02, -0.01) \\ 
+  CD163 & 0.00 (0.00, 0.01) & 0.03 (0.02, 0.03) & -0.01 (-0.01, -0.01) \\ 
+  CEACAM1 & 0.00 (0.00, 0.01) & 0.02 (0.02, 0.02) & -0.01 (-0.02, -0.01) \\ 
+  CTSL1 & 0.03 (0.02, 0.03) & 0.03 (0.03, 0.03) & -0.01 (-0.02, -0.01) \\ 
+  GADD45A & 0.02 (0.01, 0.02) & 0.03 (0.03, 0.03) & -0.02 (-0.02, -0.01) \\ 
+  GNA15 & 0.02 (0.01, 0.02) & 0.02 (0.02, 0.02) & -0.02 (-0.02, -0.02) \\ 
+  HK3 & 0.00 (0.00, 0.00) & 0.02 (0.02, 0.02) & -0.01 (-0.02, -0.01) \\ 
+  HLA-DMB & 0.01 (0.00, 0.01) & 0.03 (0.03, 0.03) & -0.01 (-0.01, -0.01) \\ 
+  IFI27 & 0.01 (0.00, 0.01) & 0.03 (0.02, 0.03) & -0.01 (-0.02, -0.01) \\ 
+  ISG15 & 0.01 (0.00, 0.01) & 0.02 (0.02, 0.02) & -0.02 (-0.02, -0.01) \\ 
+  JUP & 0.02 (0.02, 0.02) & 0.03 (0.03, 0.03) & -0.02 (-0.02, -0.01) \\ 
+  KCNJ2 & 0.00 (0.00, 0.00) & 0.02 (0.02, 0.02) & -0.01 (-0.01,  0.00) \\ 
+  KIAA1370 & 0.02 (0.01, 0.03) & 0.04 (0.03, 0.04) & -0.01 (-0.02, -0.01) \\ 
+  LY86 & 0.02 (0.01, 0.02) & 0.02 (0.02, 0.02) & -0.02 (-0.02, -0.01) \\ 
+  OASL & 0.01 (0.01, 0.02) & 0.02 (0.02, 0.03) & -0.02 (-0.02, -0.01) \\ 
+  OLFM4 & 0.01 (0.01, 0.01) & 0.03 (0.03, 0.03) & -0.01 (-0.01, -0.01) \\ 
+  PDE4B & 0.01 (0.00, 0.01) & 0.02 (0.02, 0.02) & -0.01 (-0.02, -0.01) \\ 
+  PER1 & 0.04 (0.03, 0.05) & 0.05 (0.05, 0.06) & -0.01 (-0.02, -0.01) \\ 
+  PSMB9 & 0.01 (0.00, 0.01) & 0.02 (0.01, 0.02) & -0.01 (-0.02, -0.01) \\ 
+  RAPGEF1 & 0.00 (0.00, 0.01) & 0.02 (0.02, 0.02) & -0.02 (-0.02, -0.02) \\ 
+  TGFBI & 0.01 (0.00, 0.01) & 0.02 (0.02, 0.03) & -0.01 (-0.02, -0.01) \\ 
+  ZDHHC19 & 0.04 (0.04, 0.04) & 0.05 (0.04, 0.05) & -0.02 (-0.02, -0.01) \\ 
+   \hline
+\end{tabular}
+\caption{Posterior mean estimates of rate resolution, precision and housekeeping normalization parameters for single-target models based on each target (values in brackets = 95\% credible intervals). \label{tab:single_target_rate_models_summary}} 
 \end{table}
+
+% \begin{table}[!t]
+% \centering
+%  {\begin{tabular}{|l|lll|}
+% \hline
+% Target &  $\lambda_B$ & $\sigma_B$ & $\rho_B$  \\
+% \hline
+% ARG1 & 0.02 (0.02, 0.02) & 0.03 (0.02, 0.03) & -0.03 (-0.03, -0.02) \\
+% BATF & 0.03 (0.02, 0.03) & 0.02 (0.02, 0.03) & -0.02 (-0.02, -0.01) \\
+% C3AR1 & 0.02 (0.02, 0.02) & 0.02 (0.02, 0.02) & -0.01 (-0.02, -0.01) \\ 
+% C9orf95 & 0.02 (0.01, 0.03) & 0.02 (0.02, 0.03) & -0.01 (-0.02, -0.01) \\ 
+% CD163 & 0.00 (0.00, 0.01) & 0.02 (0.02, 0.02) & -0.01 (-0.01, -0.01) \\ 
+% CEACAM1 & 0.00 (0.00, 0.01) & 0.02 (0.02, 0.02) & -0.01 (-0.02, -0.01) \\ 
+% CTSL1 & 0.03 (0.02, 0.03) & 0.03 (0.02, 0.03) & -0.01 (-0.02, -0.01) \\ 
+% GADD45A & 0.02 (0.01, 0.02) & 0.02 (0.02, 0.03) & -0.02 (-0.02, -0.01) \\ 
+% GNA15 & 0.01 (0.00, 0.02) & 0.02 (0.01, 0.02) & -0.02 (-0.02, -0.01) \\ 
+% HK3 & 0.00  (0.00, 0.00) & 0.02 (0.02, 0.02) & -0.01 (-0.02, -0.01) \\ 
+% HLA-DMB & 0.01 (0.00, 0.01) & 0.03 (0.03, 0.03) & -0.01 (-0.01, -0.01) \\ 
+% IFI27 & 0.01 (0.00, 0.01) & 0.02 (0.02, 0.02) & -0.01 (-0.01, 0.00) \\ 
+% ISG15 & 0.00  (0.00, 0.01) & 0.02 (0.02, 0.02) & -0.01 (-0.02, -0.01) \\ 
+% JUP & 0.02 (0.02, 0.02) & 0.03 (0.02, 0.03) & -0.02 (-0.02, -0.01) \\ 
+% KCNJ2 & 0.00  (0.00, 0.00) & 0.01 (0.01, 0.02) & -0.01 (-0.01, 0.00) \\ 
+% KIAA1370 & 0.01 (0.00, 0.02) & 0.03 (0.03, 0.04) & -0.01 (-0.02, -0.01) \\ 
+% LY86 & 0.02 (0.01, 0.02) & 0.02 (0.01, 0.02) & -0.02 (-0.02, -0.01) \\ 
+% OASL & 0.01 (0.01, 0.02) & 0.02 (0.02, 0.02) & -0.02 (-0.02, -0.01) \\ 
+% OLFM4 & 0.01 (0.01, 0.02) & 0.03 (0.03, 0.04) & -0.01 (-0.01, 0.00) \\ 
+% PDE4B & 0.01 (0.00, 0.02) & 0.02 (0.02, 0,02) & -0.01 (-0.02, -0.01) \\ 
+% PER1 & 0.04 (0.03, 0.05) & 0.05 (0.04, 0.06) & -0.01 (-0.02, -0.01) \\ 
+% PSMB9 & 0.01 (0.00, 0.01) & 0.01 (0.01, 0.02) & -0.01 (-0.02, -0.01) \\ 
+% RAPGEF1 & 0.00  (0.00, 0.01) & 0.02 (0.02, 0.02) & -0.02 (-0.02, -0.01)\\ 
+% TGFBI & 0.01 (0.00, 0.01) & 0.02 (0.01, 0.02) & -0.01 (-0.02, -0.01) \\ 
+% ZDHHC19 & 0.04 (0.04, 0.05) & 0.04 (0.04, 0.05) & -0.02 (-0.02, -0.01) \\ 
+% \hline
+% \end{tabular}}
+% \caption{Posterior mean estimates of rate resolution, precision and housekeeping normalization parameters for single-target models based on each target (values in brackets = 95\% credible intervals).\label{tab:single_target_rate_models_summary}}
+% \end{table}
 
 To further elucidate the range of behaviours captured by these single-target models, we simulated from the posterior predictive distributions of $\hat{B}$ and $\hat{C}$ for four targets ({CEACAM1}, {BATF}, {PER1}, and {ZDHHC19}), to parameterize scaled Gompertz curves. We used these samples to simulate scaled Gompertz curves from targets showing different types of association between \glsxtrshort{rna} input and amplification rate/cycle offset. We simulated these curves at three \glsxtrlong{ns}-derived \glsxtrshort{rna} input values (results shown in Figure~\ref{fig:sm_comp_plot}). CEACAM1 displays negligible rate dependence on \glsxtrshort{rna} input, whereas all three others appear qualitatively different in shape across the gene expression range. \emph{PER1} and \emph{ZDHHC19} exhibit the greatest offset resolution, but this is accompanied by substantially worse precision. A key point to emphasize is that, unlike in the case of \gls{qpcr}, opting for an approach based purely on time-to-threshold will under-utilize the full information content of \gls{qrtlamp} curves. As rates of amplification also appear important for characterizing \gls{qrtlamp} reactions, parameter estimates of the rates could be used in tandem with cycle offsets for target quantitation.
 
 \begin{figure}[!tpb] 
 \centering
-\includegraphics[width=5in]{../figures/chapter2/paper_sm_comp_plot.png}
+\includegraphics[width=6in]{../figures/chapter2/single_target_model_comparisons.png}
 \caption{Simulated amplification curves for four primers ({CEACAM1}, {RAPGEF1}, {BATF}, and {ZDHHC19}). Posterior predictive samples of Gompertz curves of scaled fluorescence based on posterior predictive samples from models~\ref{eq:bsm} and~\ref{eq:csm}. For each target, curves are simulated at three different \glsxtrshort{rna} input (\gls{ns}) levels -- note that higher \gls{ns} values correspond to higher expression and, generally, to lower cycle offsets (left-shifted amplification curves). Solid lines depict posterior means, while highlighted regions correspond to 95\% credible intervals. \label{fig:sm_comp_plot}}
 \end{figure}
 
@@ -273,12 +366,14 @@ Posterior summaries of the resolution function coefficients as well as the \gls{
 \caption{Posterior summaries of multi-target models for cycle offset resolution specified in Sections~\ref{sec:hierarchicalmodel}~and~\ref{sec:hierarchicalresults}, based on combinations of primer/target properties, with their associated Bayesian model stacking weights (left) and $\bm{\gamma}_C$-coefficient effects sizes (right). Effect sizes are posterior means, with error bars delineating 95\% confidence intervals. Notation as given in Table~\ref{tab:properties}.\label{fig:hierarchical_stacking_c}}
 \end{figure}
 
-We found quantities associated with resolution in both positive and negative directions whose corresponding models were assigned strong weightings by the \gls{loopsis} procedure. Increased stem length, complexity in the F3/B3 primer pair, free energy of annealing in F2/B2 regions of the FIP/BIP primers, and free energy of secondary structure formation in F3/B3 were associated with improved resolution (negative effect sizes), and all corresponding models received relatively high stacking weights. These associations, particularly for F3, may reflect the importance of the primer to the synthesis of a full-length template, resulting in more sites for primer annealing and amplification (Figure~\ref{fig:lampoverview}). Increases in complexity of LF/LB primers, free energy of self-dimerization for FIP/BIP, and free energy of secondary structure formation in LF/LB were associated with worse resolution (positive effect sizes), with corresponding models also receiving high stacking weights. We do observe some primer pairs for which posterior mean effect sizes were in opposing directions. For example, free energy of self-dimerization shows a positive effect for the B3 primer and a negative effect for F3. We see that no such models were assigned large stacking weights. We might expect these different associations with resolution due to stochasticity of the \gls{lamp} assay in the production of intermediates from either strand of the target.
+We found quantities associated with resolution in both positive and negative directions whose corresponding models were assigned strong weightings by the \gls{loopsis} procedure. Increased stem length, complexity in the F3/B3 primer pair, free energy of annealing in F2/B2 regions of the FIP/BIP primers, and free energy of secondary structure formation in F3/B3 were associated with improved resolution (negative effect sizes), and all corresponding models received relatively high stacking weights.
+Immediately striking is the observation that, despite the widespread assumption that design of the FIP/BIP primers is most influential in determining \gls{lamp} performance, we detect surprisingly strong associations with properties of other primer pairs. This is a strong signal suggesting the need for future follow-up work.
+These associations, particularly for F3, may reflect the importance of the primer to the synthesis of a full-length template, resulting in more sites for primer annealing and amplification (Figure~\ref{fig:lampoverview}). Increases in complexity of LF/LB primers, free energy of self-dimerization for FIP/BIP, and free energy of secondary structure formation in LF/LB were associated with worse resolution (positive effect sizes), with corresponding models also receiving high stacking weights. We do observe some primer pairs for which posterior mean effect sizes were in opposing directions. For example, free energy of self-dimerization shows a positive effect for the B3 primer and a negative effect for F3. We see that no such models were assigned large stacking weights. We might expect these different associations with resolution due to stochasticity of the \gls{lamp} assay in the production of intermediates from either strand of the target.
 
-\subsection{Multi-target model identifies distinct across-target and within-target effects of primer variation \label{sec:ivt_results}}
-In this section we describe our use of a distinct, novel synthetic dataset (preparation described in Section~\ref{sec:data} and \citealp{remmel_diagnostic_2022}) to address with more granularity the direct effects of changes to primer sequences on assay resolution. While in Section~\ref{sec:hierarchicalresults} we identified interesting and unexpected associations with other primer pairs, here we focused on FIP and BIP primers. In the previous analysis, we pooled our data across targets to estimate associations of assay properties with resolution. However, while we showed associations of these properties with resolution across targets, we could not determine for any \emph{individual} target whether variation in these properties was associated with variation in resolution. To address the latter objective (arguably more important for \gls{lamp} optimization), we generated a \gls{ivt} \glsxtrshort{rna} dataset comprising multiple primer sets (containing multiple combinations of the FIP and BIP primers) for each target. We fitted models with two different forms of resolution function. In the first form, for each combination of assay properties we fitted a model based on those properties alone with no target-level grouping terms (\emph{across-target} models). In this way, the resolution function $\lambda$ did not depend on target ($k$) other than through the primer set ($l$) features $\bm{z}_{kl}$ (e.g., $\lambda(z_{kl}; \bm{\gamma}) = \gamma_0 + \gamma_{L_{\text{stem}}} L_{\text{stem},k,l}$).
+\subsection{Varying qRT-LAMP primer sequences identifies distinct across-target and within-target patterns of assay resolution \label{sec:ivt_results}}
+In this section we describe our use of a distinct, novel synthetic dataset (preparation described in Section~\ref{sec:data} and \citealp{remmel_diagnostic_2022}) to address with more granularity the direct effects of changes to primer sequences on assay resolution. While in Section~\ref{sec:hierarchicalresults} we identified interesting and unexpected associations with other primer pairs, here we focused on FIP and BIP primers -- future work will address comparable questions for F3/B3/LF/LB. In the previous analysis, we pooled our data across targets to estimate associations of assay properties with resolution. However, while we showed associations of these properties with resolution across targets, we could not determine for any \emph{individual} target whether variation in these properties was associated with variation in resolution. To address the latter objective (arguably more important for \gls{lamp} optimization), we generated a \gls{ivt} \glsxtrshort{rna} dataset comprising multiple primer sets (containing multiple combinations of the FIP and BIP primers) for each target. We fitted models with two different forms of resolution function. In the first form, for each combination of assay properties we fitted a model based on those properties alone with no target-level grouping terms (\emph{across-target} models). In this way, the resolution function $\lambda$ did not depend on target ($k$) other than through the primer set ($l$) features $\bm{z}_{kl}$ (e.g., $\lambda(z_{kl}; \bm{\gamma}) = \gamma_0 + \gamma_{L_{\text{stem}}} L_{\text{stem},k,l}$).
  
-In the second model form (\emph{within-target}), we specified a hierarchical random effects term (varying by target) for the resolution intercept, $\gamma_0$. In this way, we were able to infer the dependence of resolution on primer set properties while accounting for intrinsic target-to-target variation in resolution. Summarized inferences and model stacking weights after fitting of the across-target and within-target models to the \gls{ivt} \glsxtrshort{rna} data appear in Figure~\ref{fig:ivt_eval}.
+In the second model form (\emph{within-target}), we specified a hierarchical random effects term (varying by target) for the resolution intercept, $\gamma_0$. In this way, we were able to infer the dependence of resolution on primer set properties while accounting for intrinsic target-to-target variation in resolution. Summarized inferences and model stacking weights after fitting of the across-target and within-target models to the \gls{ivt} \glsxtrshort{rna} data appear in Figure~\ref{fig:ivt_eval}. Note again that these models are not a subset of those shown in Figure~\ref{fig:hierarchical_stacking_c}, but rather similar models applied to a novel synthetic \gls{ivt} dataset with systematically varied FIP and BIP primers.
 
 \begin{figure}[!tpb] 
 \centering
@@ -294,8 +389,12 @@ We have presented and applied a novel model-based framework to characterize quan
 
 We highlight several advantages of our approach. The single-target models introduced in Section~\ref{sec:singletargetmodel} and applied in Section~\ref{sec:sensitivityprecision} provide a formal framework for inference with uncertainty of \gls{qrtlamp} performance measures such as resolution and precision. This approach allows assay developers to ascertain the quantitative performance of an already-designed \gls{lamp} target. Such inferences may in turn motivate optimization of the given target or, in light of poor target performance, alternative target selection as part of a broader panel of target biomarkers. Furthermore, both our single-target and multi-target models allow decomposition of variation in \gls{lamp} reaction characteristics into components useful for \gls{mrna} quantitation (i.e. amplification rate and cycle offset). By incorporating different features of the assay into model components for \glsxtrshort{rna}-dependent and \glsxtrshort{rna}-independent variation, we can uncover potentially tuneable determinants of \gls{lamp} assay performance. Indeed, our framework applied to \gls{ivt} \glsxtrshort{rna} data revealed significant associations between primer and target features and assay resolution. While \gls{ivt} \glsxtrshort{rna} data are useful for assay development due to their cost and ease of handling, they are not biologically representative and would likely not recapitulate assay performance seen on clinical samples. As we could adapt our models to both \gls{ivt} \glsxtrshort{rna} and clinical samples, we were able to compare our inferences across different data types and to better anticipate clinical performance of a given assay. We see our framework and analysis as important first steps towards a system for \gls{lamp} assay design and optimization.
 
-However, the results of our hierarchical modeling (Section~\ref{sec:ivt_results}) highlight the complexities of optimizing \gls{qrtlamp} assay performance. While FIP and BIP primers are known to play a central role in LAMP-based amplification, our model-based analysis (Figure~\ref{fig:ivt_eval}) provides evidence that other primer characteristics may also affect assay performance. Models based on loop amplification and inner primer pairs were identified by model stacking as producing some of the most robust and predictive associations. Furthermore, our findings suggest that increasing a given property (for example, free energy of self-dimerization) may be associated with improved resolution for one primer pair (FIP/BIP) but the opposite for another (LF/LB). As changing one oligo property (e.g. secondary structure formation) may alter another (propensity to self-dimerize), our results support joint consideration of all primer pair characteristics as part of assay optimization efforts. %In addition, we highlight the importance of model validation, provided here by \gls{loopsis} approximations to leave-one-out cross-validation. High stacking weight scores indicated good agreement between clinical and (within-target) \gls{ivt} models. 
-We also observe, for several properties, a difference in directionality of effect sizes between forward and backward primers (Figure~\ref{fig:ivt_eval}). Subject to further investigation, we hypothesize that this difference in directionality between members of a primer pair could arise due to the orientation of initial \glsxtrshort{rna} inputs to the \gls{lamp} assay. For example, B3 primers could anneal to \glsxtrshort{rna} inputs before reverse transcription while F3 primers -- relying on the generation of an F3c region -- could not anneal until after reverse transcription, and this could explain some degree of within-primer pair disparity.
+However, the results of our hierarchical modeling (Section~\ref{sec:ivt_results}) highlight the complexities of optimizing \gls{qrtlamp} assay performance. While FIP and BIP primers are known to play a central role in LAMP-based amplification, our model-based analysis (Figure~\ref{fig:hierarchical_stacking_b}, \ref{fig:hierarchical_stacking_c}) provides evidence that other primer characteristics may also affect assay performance. Models based on loop amplification and inner primer pairs were identified by model stacking as producing some of the most robust and predictive associations. Furthermore, our findings suggest that increasing a given property (for example, free energy of self-dimerization) may be associated with improved resolution for one primer pair (FIP/BIP) but the opposite for another (LF/LB). As changing one oligo property (e.g. secondary structure formation) may alter another (propensity to self-dimerize), our results support joint consideration of all primer pair characteristics as part of assay optimization efforts. %In addition, we highlight the importance of model validation, provided here by \gls{loopsis} approximations to leave-one-out cross-validation. High stacking weight scores indicated good agreement between clinical and (within-target) \gls{ivt} models. 
+We also observe, for several properties, a difference in 
+magnitude % directionality 
+of effect sizes between forward and backward primers (Figure~\ref{fig:ivt_eval}). Subject to further investigation, we hypothesize that this difference in 
+assocation strength % directionality 
+between members of a primer pair could arise due to the orientation of initial \glsxtrshort{rna} inputs to the \gls{lamp} assay. For example, B3 primers could anneal to \glsxtrshort{rna} inputs before reverse transcription while F3 primers -- relying on the generation of an F3c region -- could not anneal until after reverse transcription, and this could explain some degree of within-primer pair disparity. However, this trend is far from clear and consistent across different quantities and primer pairs, so much further investigation is required.
 
 While we see advantages to our approach in characterizing pre-designed \gls{lamp} assay performance, further work is required to accurately predict performance in a proposed assay for a potentially novel target. As part of our efforts towards a more predictive model, we analyzed multiple primer sets per target with our \gls{ivt} \glsxtrshort{rna} dataset. Indeed, we found for multiple models that the effects of varying properties of primers and amplicons differ in their strength and direction when viewed across-target vs within-target (Figure~\ref{fig:ivt_eval}). Put another way, accounting for target-to-target differences in resolution not due to the assay features attenuated the strength of association between the features and resolution. These results suggest that other assay features may be explaining target-to-target differences in resolution and that predictive models based on pooling all targets together (i.e. across-target models) may not generalize well to new targets. Interestingly, recent work on predictive modeling of \gls{pcr} amplification from primer/target features showed good performance in held-out test sets~\citep{doring_modeling_2019}. This performance could be due to both a focus on a highly related set of targets which might be expected to share assay performance properties as well as due to random data subsampling to create training, validation and test data splits for model development. In this setting, all splits would likely include observations for a given target (a kind of information leakage), complicating interpretation of the model's generalizability. However, if we consider a highly related family of targets to be similar to a single target, the results of~\citet{doring_modeling_2019} are consistent with our findings that within-target trends (rather than general trends shared across targets) in the relationship between \gls{lamp} assay performance and primer properties are important for optimization of a given target or target family. Reliably determining the optimal properties of a primer set to achieve a pre-specified level of quantitative performance would allow for less trial-and-error in the development process, and ongoing and future work will be required to add both more targets and primer sets to our \gls{ivt} \glsxtrshort{rna} dataset.
 %From these distinct effects we emphasise that studies based purely on across-target observational data may be misleading, or at least fail to capture the whole picture.
