@@ -86,6 +86,11 @@ colorlinks,linkcolor=black,citecolor=blue,urlcolor=blue,breaklinks = true
 \newacronym[plural = ATEs, firstplural = average treatment effects]{ate}{ATE}{average treatment effect}
 \newacronym{pgm}{PGM}{probabilistic graphical model}
 \newacronym{iqr}{IQR}{inter-quartile range}
+\newacronym{mskcc}{MSKCC}{the memorial Sloan Kettering cancer centre}
+\newacronym{pfs}{PFS}{progression-free survival}
+\newacronym{rct}{RCT}{randomised controlled trial}
+\newacronym[plural = ANNs, firstplural = artificial neural networks]{ann}{ANN}{artificial neural network}
+\newacronym{vcf}{VCF}{variant called format}
 
 % \newglossaryentry{latex}
 % {
@@ -181,11 +186,17 @@ I'm going to keep adding to this list of sections that are broadly speaking read
         \2 1.1.2 Overview of statistical learning and machine learning. Bit of loose definition work talking about `prediction', `regression', `model fitting'. While ML is in the title of the thesis for cynical professional reasons, motivate why `can't we just use fancy ML stuff' isn't always/often an option with the data we're working with.
     \1 Section 1.2 Biologial background necessary to understand what's going to happen in the rest of the thesis.
         \2 1.2.1 The core relationships between genomics quantities (DNA, RNA, protein). Should give enough detail that when data types/specific datasets are introduced later on people will know where they fit into the bigger biology picture.
-        \2 1.2.2 Motivating that molecular biology as a whole has been useful in medicine. Not yet finished section on everything but cancer, then a fairly well-developed discussion of cancer specifically.
-    \1 Section 2. This is obviously an entire chapter. It's fairly well developed (hopefully). It would be great if at some point you could have a peruse and we can work on where the conceptual sticking points are for an informed statistical reader, and therefore what needs to go into the introducion to provide the background needed.
-    \1 Appendix B. This dicusses how the \texttt{ICBioMark} package is used. I did experiment with putting it in its own section in the chapter, but somehow it felt more at home in methods. Eventually after I decided there was enough to say about LAMP code to have an appendix, I decided to give it its own. Let me know what you think.
-    \1 Sections 4.1-4.3. These outline all aspects of heterogeneous treatment effect estimation up to (but not yet including) survival outcomes.
-    \1 4.3-4.5 I'm aware the lack of an in-depth Chapter~4 write-up makes things tricky. I've tried to make up for this by laying out in a fair amount of detail what I'm hoping to put where.
+        \2 1.2.2 Motivating that molecular biology as a whole has been useful in medicine, with a particular focus on how its impacted cancer research.
+        \2 1.2.3 Overview of common technologies in genomics. Should be enough that readers know what we're talking about in terms of targeted sequencing in Chapters 3 and 4, and to get enough of a grasp of PCR to understand what LAMP is trying to do and why it's different in Chapter 2.
+    \1 Section 2. This is obviously an entire chapter that will be fresh-ish for you. It's fairly well developed (hopefully). I don't see realistically making huge changes to the content, but it'd be great to get a sense of how undertandable it is with the introduction, and any more context that needs giving.
+    \1 Section 4. This is all getting thrown together very fast, and I think should be the next thing you read after finished intro sections and Chapter~2. At the moment it's basically got results for half of the methods I want to demo, with the other methods following a similar trajectory. 
+        \2 Sections 4.1-4.3. These outline all aspects of heterogeneous treatment effect estimation up to (but not yet including) survival outcomes. There's a reasonable amount of writing there but it'll need editing.
+        \2 4.5 This should now lay out the experiments I'm hoping to have in place for causal survival forests and regularisation based HTE estimation, with only causal survival forests so far in place.
+    % \1 Appendices. I think these are low priorities. Appendices A and B are for LAMP, Appendix C for TMB. I haven't fleshed them out, and think this might actually be a good task for the week after you leave in July. 
+    %     \2 Appendix A: We have an R package for feature generation for LAMP, and I also want to talk about clever codey workflow management stuff I've done. 
+    %     \2 Appendix B: Summary figures for Chapter 2 that don't make it into the main text. 
+    %     \2 Appendix C: This dicusses how the \texttt{ICBioMark} package is used. I did experiment with putting it in its own section in the chapter, but somehow it felt more at home in methods. Eventually after I decided there was enough to say about LAMP code to have an appendix, I decided to give it its own. Let me know what you think.
+    
 \end{outline}
 }
 
@@ -217,7 +228,7 @@ assays \label{chap:lamp_modelling}}
 \chapter{Computational workflow for LAMP assay analysis}
 \subfile{chapters/appendix1}
 
-\chapter{In-depth model summaries for LAMP assay analysis}
+\chapter{Extened model summaries for LAMP assay analysis}
 \subfile{chapters/appendix2}
 
 \chapter{Open-source software accompanying TMB estimation}

@@ -54,7 +54,7 @@ for $i=0,\ldots, n$.  For example, including all non-synonymous mutation types i
 Our main goal is to predict $T_{0\bar{S}}$ based on $\{M_{0gs}: g \in P, s \in S\}$, where the panel $P \subseteq G$ has length $\ell_P$ satisfying some upper bound. When it is clear from context that we are referring to the test sample and a specific choice of biomarker (i.e.~$\bar{S}$ is fixed), we will simply write $T$ in place of $T_{0\bar{S}}$. 
 
 \subsection{Generative model \label{sec:genmodel}}
-We now describe the main statistical model that underpins our methodology. In order to account for selective pressures and other factors within the tumour, we allow the rate at which mutations occur to depend on the gene and type of mutation. Our model also includes a sample-dependent parameter to account for the differing levels of mutagenic exposure of tumours, which may occur due to exogenous (e.g.~\gls{uv} light, cigarette smoke) or endogenous (e.g.~inflammatory, free radical) factors.  
+We now describe the main statistical model that underpins our methodology. In order to account for selective pressures and other factors within the tumour, we allow the rate at which mutations occur to depend on the gene and type of mutation. Our model also includes a sample-dependent parameter to account for the differing levels of mutagenic exposure of tumours, which may occur due to exogenous (e.g.~\glsxtrshort{uv} light, cigarette smoke) or endogenous (e.g.~inflammatory, free radical) factors.  
 
 We model the mutation counts $M_{igs}$ as independent Poisson random variables with mutation rates $\phi_{igs} > 0$. More precisely, for $i = 0, 1, \ldots, n$, $g \in G$ and $s \in S$, we have
 \begin{equation}

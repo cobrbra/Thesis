@@ -4,14 +4,16 @@
 
 
 \section{Overview}
-In this final chapter, we are motivated by the questions left unanswered by Chapter~\ref{chap:tmb_estimation}. In particular, previously we have relied on an established body of literature verifying the utility of \gls{tmb} as a proxy biomarker for response to immunotherapy. This has been advantageous in that is has allowed us not to concern ourselves with directly showing our derived mutation signatures are associated with improved response to immunotherapy (indeed, in many of the datasets exhibited in Chapter~\ref{chap:tmb_estimation} no such information was available), but rather just to predict \gls{tmb} as well as we can from \gls{wes} data. We need not worry whether \gls{tmb} is available as we can directly calculated it from \gls{tmb}. We now wish to interrogate further the direct relationship between genomic signatures (such as \gls{tmb}) derived from targeted gene panel sequencing and .
+In this final chapter, we are motivated by the questions left unanswered by Chapter~\ref{chap:tmb_estimation}. In particular, previously we have relied on an established body of literature verifying the utility of \gls{tmb} as a proxy biomarker for response to immunotherapy. This has been advantageous in that is has allowed us not to concern ourselves with directly showing our derived mutation signatures are associated with improved response to immunotherapy, aside from in some particular cases such as in Figure~\ref{fig:responseclass}. Indeed, in many of the datasets exhibited in Chapter~\ref{chap:tmb_estimation} no such information was available. Instead, we've principally aimed to predict \gls{tmb} as well as we can from \gls{wes} data. We've not needed to worry whether \gls{tmb} is available for a given \gls{wes} as we can directly calculated it from exome-wide data.  This has been a helpful simplification, but broader methods are required if we wish to more directly interrogate the relationship between genomic signatures (including but not limited to \gls{tmb}) derived from targeted sequencing and clinical outcomes. 
 
+In order to more fully understand the relationship between somatic biomarkers and clinical outcomes, two substantial hurdles are presented. Firstly, while in Chapter~\ref{chap:tmb_estimation} we were able to utilise two small datasets for which binary clinical outcomes (corresponding to `durable clinical benefit') were available, in general clinical the measurement of clinial outcomes is not as simple. By far the most common means of reporting is via survival-like clinical outcomes. These can track a variety of outcomes, such as \glsfirst{os} or \glsfirst{pfs}, but are fundamentally restricted by the timespan of a given study period. This problem is known as \textit{censoring} and is discussed at length in Section~\ref{sec:survival}. Secondly, our reliance on \gls{tmb} was motivated by extensive work establishing \gls{tmb}'s clinical utility in randomised treatment scenarios. We don't have the resources to conduct a large \gls{rct}, and so will have to proceed by combining multiple \emph{observational} datasets. This requires a framework for causal inference, and the one we choose is known as \glsfirst{hte}, described in Section~\ref{sec:hte}.
+
+In this chapter, after describing the fundamentals of survival analysis (Section~\ref{sec:survival}) and \gls{hte} (Section~\ref{sec:hte}) we review recent literature on methods to combine these two techniques in Section~\ref{sec:hte_survival}. In Section~\ref{sec:immuno_hte}, we briefly demonstrate an application of these methods to verify the causal role of \gls{tmb} by combining two somatic mutation datasets, and then discuss applying them to produce more flexible estimators of benefit from immunotherapy.
 
 \section{Survival analysis \label{sec:survival}}
 
 
 \subsection{Survival times}
-
 Survival analysis concerns modelling the amount of time elapsing before a given event occurs. In medical settings, this is often time-to-death analysis, but the same framework is used to approach other events, both medical (e.g. relapse or visit to hospital) and non-medical (machine lifetime, customer churn, etc.). We will refer here to the generic `event' as death (since this is our main application case), generic `samples' as patients, and time-to-event measures as survival times. For a patient $i$, we will typically refer to survival times with either a lower case $t_i$ (for observations) or upper case $T_i$ (for random variables). We note the following properties we might expect from survival times, both of which influence decisions around modelling:
 \begin{enumerate}
     \item `Survival times are continuous' ($t_i \in \mathbb{R}$). This is intuitively true in many situations, but we often only have access to discrete bins (e.g. months). This can lead to modelling complexities such as the presence of exact ties between observations.
@@ -82,7 +84,7 @@ satisfying the proportional hazards assumption with $h_0(t) = k\lambda_0^{-k}t^{
 
 \subsection{Fitting survival models}
 
-\section{Heterogeneous treatment effect}
+\section{Heterogeneous treatment effect \label{sec:hte}}
 \Glspl{hte} refer to interactions between the effect of some intervention, or \emph{treatment}, and some other covariates. In particular we aim to predict, from some input covariates, the change in outcome for a given sample upon applying a given intervention, while by definition never being able to observe a sample when the given treatment has both been applied and not been applied (referred to as the \emph{fundamental problem for causal inference}; \citealp{holland_statistics_1986}). Similar to how we approached survival, we first establish some terminology for causal inference without considering prediction based on covariates, and then move on to consider \glspl{hte}.
 
 \subsection{Potential outcomes}
@@ -108,11 +110,13 @@ These are considered sufficient to estimate the \emph{\gls{ate}}, defined as $AT
 \end{align*}
 and $X$, $Y$ and $A$ are all observed quantities. Assumption~1 establishes that we can expect to observe samples with both $A=0$ and $A=1$ across the support of $X$. Methods for estimation of $ATE$ have been proposed for a variety of modelling assumptions and contexts \citep{reiersol_confluence_1945, thistlethwaite_regression-discontinuity_1960, rosenbaum_central_1983, abadie_semiparametric_2005, craig_natural_2017, roth_whats_2023}. One common such method is propensity score matching, which relies on partitioning observations into groups with approximately equal propensity scores. Note that 
 \begin{align*}
-    \mathbb{P}(A=1 | \pi(X), Y^{(1)}, Y^{(0)}) & = \bbE[A | \pi(X), Y^{(1)}, Y^{(0)}] & \\
-    & = \bbE[\bbE[A | X, Y^{(1)}, Y^{(0)}] | \pi(X), Y^{(1)}, Y^{(0)}] & \text{(by the tower property)}\\
-    & = \bbE[\bbE[A|X]|\pi(X), Y^{(1)}, Y^{(0)}] & \text{(by Assumption~2)} \\
-    & = \bbE[\pi(X) | \pi(X), Y^{(1)}, Y^{(0)}] & \text{(by definition of propensity)} \\
-    & = \pi(X) = \mathbb{P}(A=1|\pi(X)), &
+    \mathbb{P}(A=1 | \pi(X), Y^{(1)}, Y^{(0)}) & = \bbE[A | \pi(X), Y^{(1)}, Y^{(0)}]  \\
+    & = \bbE[\bbE[A | X, Y^{(1)}, Y^{(0)}] | \pi(X), Y^{(1)}, Y^{(0)}] \\
+    & \hspace{50pt} \text{(by the tower property)}\\
+    & = \bbE[\bbE[A|X]|\pi(X), Y^{(1)}, Y^{(0)}] \\ & \hspace{50pt} \text{(by Assumption~2)} \\
+    & = \bbE[\pi(X) | \pi(X), Y^{(1)}, Y^{(0)}] 
+ \\ & \hspace{50pt} \text{(by definition of propensity)} \\
+    & = \pi(X) = \mathbb{P}(A=1|\pi(X)), 
 \end{align*}
 so that $\{Y^{(0)}, Y^{(1)}\} \perp\!\!\!\perp A | X \Rightarrow \{Y^{(0)}, Y^{(1)}\} \perp\!\!\!\perp A | \pi(X)$ (this is due to \citealt{rosenbaum_central_1983}). We can then say that
 \[ATE = \bbE[\bbE[Y|\pi(X), A=1] - \bbE[Y|\pi(X), A=0]].\]
@@ -253,15 +257,43 @@ Another view of the two heuristic extremes described in Section~\ref{sec:doubler
 \subsection{Causal forests}
 \citep{athey_generalized_2019}
 
-\section{Heterogeneous treatment effects applied to survival analysis}
+\section{Heterogeneous treatment effects applied to survival analysis \label{sec:hte_survival}}
 
-\subsection{Forests again}
+\subsection{Forests again \label{sec:surv_hte_forests}}
+\citep{cui_estimating_2022}
 
 \subsection{Regularisation again}
+\citep{chapfuwa_enabling_2021}
 
-\section{Application to a combined immunotherapy dataset}
+\section{Application to a combined immunotherapy dataset \label{sec:immuno_hte}}
+
+\subsection{Data sources}
+
+We compare two datasets comprising mutation and clinical data derived from late stage cancer patients. The first dataset, produced by \citet{zehir_mutational_2017}, is derived from a large cohort treated at \gls{mskcc}. It was produced in order to inform decisions around experimental treatment regimes for patients whose tumours had been refractory to standard care. The second, produced by \citet{hellmann_genomic_2018}, describes a smaller (but still substantial) cohort of patients at similar disease stages who were then treated with \gls{icb}. While there are differences between the two datasets in both the availability of clinical data and the specifics of patient trajectory, the two studies provide usefully comparable data sources for patients that were and were not treated by immunotherapy. Crucially, since both analyses were performed using the MSK-IMPACT targeted sequencing panel, their mutation profiling is very comparable. We describe further characteristics of each dataset below. 
+
+\subsubsection*{Zehir et al.}
+This study by \gls{mskcc} provides somatic mutation data, as well as some clinical covariates, for over 10,000 patients with late stage cancer of a variety of types. These patients were, by entry criteria, those who would be eligible to participate in clinical trials for experimental drugs. After the sequencing study was conducted, a minority (11\%; 527 patients) did indeed go on to be matched to further trials on the basis of their mutation profile. Overall survival statistics are provided relative to a baseline given by the time point at which the procedure for recovering the sequencing sample was performed. Many samples were taken from metastatic sites, and some patients had multiple samples recovered. The fact that all tumours sequenced in the study were those of late stage cancers is emphasised by the authors as allowing a fuller picture of the mutations associated with cancer development and response to first-line treatment. Clinical features available include detailed cancer type information, metastatic status, sex, and smoking history.
+
+\subsubsection*{Hellman et al.}
+This dataset describes advanced cancer patients who did receive \gls{icb} treatment based on inhibition of \gls{pdl1}, \gls{ctla4}, or both. For these patients, overall survival was measured from the date of first \gls{icb} treatment. Clinical features available include sex, age, and drug type.
 
 \subsection{Validating TMB}
+We begin by investigating the extent to which the methods we've described for heterogeneous treatment effect estimation can recapitulate the known relationship between \gls{tmb} and benefit from immunotherapy. This is a valuable benchmark for any modelling approach, because basing predictions on \gls{tmb} alone (alongside any available general clinical features) means working with an input of low dimension, which should not present a challenge to any estimation method.
+
+We begin by applying the causal survival forests method of \citet{cui_estimating_2022}. To restrict the focus of this demonstrative application, we consider only \gls{nsclc} patients from each of the datasets described above. To simplify matters further, we consider only patients without missing data for time-to-event, censoring status, sex, or \gls{tmb} values, and where multiple samples are available for a given patient we take only the sample with the highest sequencing coverage. After these restrictions we are left with samples from 129 immunotherapy-treated patients, and 603 not treated with immunotherapy. We take 75\% of these samples (96 immunotherapy, 452 non-immunotherapy) as a training dataset. We apply causal survival forests to predict differences in probability of survival after two years, as described in Section~\ref{sec:surv_hte_forests}.
+
+We present out-of-bag predictions of difference in survival probability for each patient using this method in Figure~\ref{fig:immuno_train_samples_hte_predictions}. We see a substantial improvement in expected benefit from immunotherapy with increased \gls{tmb} at low \gls{bmr}, before a plateau at around 20mut/Mb. Sex, the only clinical covariate available across both datasets (more on this later), appears to play a role moderating the strength of dependence. Within this trend, female patients appeared to show more sensitivity to changes in \gls{tmb} than their male counterparts, but this effect is fairly weak. 
+
+\begin{figure}[!tpb] 
+\centering
+\includegraphics[width=\textwidth]{figures/chapter4/immuno_train_samples_hte_predictions.png}
+\caption{Out-of-bag predictions of difference of probability of 2-year survival after treatment with immunotherapy for non-small cell lung cancer patients.  \label{fig:immuno_train_samples_hte_predictions}}
+\end{figure}
+
+Interestingly, while a strong dependence on \gls{tmb} is observed, the highest level of estimated benefit from immunotherapy is low, and indeed for the majority of patients with low \gls{tmb} we estimate negative benefit from immunotherapy treatment. We hypothesise that this is due to uncaptured differences in typical clinical features between the two datasets. As mentioned above, to perform this analysis we were only able to utilise clinical factors that were recorded across both studies. As a conglomeration of multiple studies itself, the \citet{zehir_mutational_2017} dataset in particular did not make available several pieces of data that would be expected to impact disease trajectories significantly. The two most important of these, which would certainly be necessary to strengthen any associations learned here, would be patient age, and disease stage. Systematic variation in either would be likely to impact the difference in average rate of two-year survival between the two data sources and skew overall estimation of immunotherapy benefit (even if the relationship with \gls{tmb} was accurately captured).
+
+
+{\color{red} Add the same as above, with the regularisation method.}
 
 \subsection{Exploring more general markers}
 
