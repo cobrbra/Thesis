@@ -4,9 +4,9 @@
 
 
 \section{Overview}
-In this final chapter, we are motivated by the questions left unanswered by Chapter~\ref{chap:tmb_estimation}. In particular, previously we have relied on an established body of literature verifying the utility of \gls{tmb} as a proxy biomarker for response to immunotherapy. This has been advantageous in that is has allowed us not to concern ourselves with directly showing our derived mutation signatures are associated with improved response to immunotherapy, aside from in some particular cases such as in Figure~\ref{fig:responseclass}. Indeed, in many of the datasets exhibited in Chapter~\ref{chap:tmb_estimation} no such information was available. Instead, we've principally aimed to predict \gls{tmb} as well as we can from \gls{wes} data. We've not needed to worry whether \gls{tmb} is available for a given \gls{wes} as we can directly calculated it from exome-wide data.  This has been a helpful simplification, but broader methods are required if we wish to more directly interrogate the relationship between genomic signatures (including but not limited to \gls{tmb}) derived from targeted sequencing and clinical outcomes. 
+In this final chapter, we are motivated by the questions left unanswered in Chapter~\ref{chap:tmb_estimation}. In particular, previously we have relied on an established body of literature verifying the utility of \gls{tmb} as a proxy biomarker for response to immunotherapy. This has been advantageous in that is has allowed us not to concern ourselves with directly showing our derived mutation signatures are associated with improved response to immunotherapy, aside from in some particular cases such as in Figure~\ref{fig:responseclass}. Indeed, for many of the datasets utilised and/or exhibited in Chapter~\ref{chap:tmb_estimation} no detailed information on response to treatment with immunotherapy was available. Instead, we've simply aimed to predict \gls{tmb} as well as we can from slices of \gls{wes} data. This is especially convenient because \gls{tmb} can be directly calculated from \gls{wes} data and does not needed to be provided by a study as a separate candidate.  While aiming to predict \gls{tmb} has been a helpful simplification, broader methods are required if we wish to more directly interrogate the relationship between genomic signatures (including but not limited to \gls{tmb}) derived from targeted sequencing and clinical outcomes. 
 
-In order to more fully understand the relationship between somatic biomarkers and clinical outcomes, two substantial hurdles are presented. Firstly, while in Chapter~\ref{chap:tmb_estimation} we were able to utilise two small datasets for which binary clinical outcomes (corresponding to `durable clinical benefit') were available, in general clinical the measurement of clinial outcomes is not as simple. By far the most common means of reporting is via survival-like clinical outcomes. These can track a variety of outcomes, such as \glsfirst{os} or \glsfirst{pfs}, but are fundamentally restricted by the timespan of a given study period. This problem is known as \textit{censoring} and is discussed at length in Section~\ref{sec:survival}. Secondly, our reliance on \gls{tmb} was motivated by extensive work establishing \gls{tmb}'s clinical utility in randomised treatment scenarios. We don't have the resources to conduct a large \gls{rct}, and so will have to proceed by combining multiple \emph{observational} datasets. This requires a framework for causal inference, and the one we choose is known as \glsfirst{hte}, described in Section~\ref{sec:hte}.
+In order to more fully understand the relationship between somatic biomarkers and clinical outcomes, two substantial hurdles are presented. Firstly, while in Chapter~\ref{chap:tmb_estimation} we were able to utilise two small datasets for which binary clinical outcomes (corresponding to `durable clinical benefit') were available, in general clinical the measurement of clinial outcomes is not as simple. By far the most common means of reporting is via survival-like clinical outcomes. These can track a variety of endpoints, such as \glsfirst{os} or \glsfirst{pfs}, but are fundamentally restricted by the timespan of a given study period such that not every sample has an associated endpoint observed. This problem is known as \textit{censoring} and is discussed at length in Section~\ref{sec:survival}. Secondly, our reliance on \gls{tmb} was motivated by extensive work establishing \gls{tmb}'s clinical utility in randomised treatment scenarios. We don't have the resources to conduct a large \gls{rct}, and so will have to proceed by combining multiple \emph{observational} datasets. This requires a framework for causal inference, and the one we choose is known as \glsfirst{hte}, described in Section~\ref{sec:hte}.
 
 In this chapter, after describing the fundamentals of survival analysis (Section~\ref{sec:survival}) and \gls{hte} (Section~\ref{sec:hte}) we review recent literature on methods to combine these two techniques in Section~\ref{sec:hte_survival}. In Section~\ref{sec:immuno_hte}, we briefly demonstrate an application of these methods to verify the causal role of \gls{tmb} by combining two somatic mutation datasets, and then discuss applying them to produce more flexible estimators of benefit from immunotherapy.
 
@@ -14,22 +14,17 @@ In this chapter, after describing the fundamentals of survival analysis (Section
 
 
 \subsection{Survival times}
-Survival analysis concerns modelling the amount of time elapsing before a given event occurs. In medical settings, this is often time-to-death analysis, but the same framework is used to approach other events, both medical (e.g. relapse or visit to hospital) and non-medical (machine lifetime, customer churn, etc.). We will refer here to the generic `event' as death (since this is our main application case), generic `samples' as patients, and time-to-event measures as survival times. For a patient $i$, we will typically refer to survival times with either a lower case $t_i$ (for observations) or upper case $T_i$ (for random variables). We note the following properties we might expect from survival times, both of which influence decisions around modelling:
+Survival analysis concerns modelling the amount of time elapsing before a given event occurs. In medical settings, this is often time-to-death analysis, but the same framework is used to approach other events, both medical (e.g. relapse or visit to hospital) and non-medical (machine lifetime, customer churn, etc.). We will refer here to the generic `event' as death (since this is our main application case) and time-to-event measures as survival times. For a patient/sample $i$, we will refer to survival times with either a lower case $t_i$ (for observations) or upper case $T_i$ (for random variables). We note the following properties we might expect from survival times, both of which influence decisions around modelling:
 \begin{enumerate}
-    \item `Survival times are continuous' ($t_i \in \mathbb{R}$). This is intuitively true in many situations, but we often only have access to discrete bins (e.g. months). This can lead to modelling complexities such as the presence of exact ties between observations.
-    \item `Survival times are positive' ($t_i > 0$). This introduces another important notion: that survival times are \emph{relative} to some other point in time. The definition of this point in time can be important and varied between (and sometimes within) studies.
+    \item `Survival times are continuous': $t_i \in \mathbb{R}$. This is intuitively true in many situations, but we typically only measure data in discrete bins (e.g. months). This can introduce complexities such as exact ties in survival time.
+    \item `Survival times are positive': $t_i > 0$. This is a consequence of survival times always being \emph{relative to some other time point}. The choice of this baseline can often vary between (and even within) studies.
 \end{enumerate}
-Point two above emphasises the importance of appropriate definition of starting time for interpreting survival times. Of perhaps even greater subtlety can be the definition of end time. In the cases we're addressing, this tends to be patient death (often referred to as \gls{os}). However, we are often implicitly interested in analysing the likelihood of dying from one particular factor (e.g. lung cancer). In many studies, death from other causes (which, complexifying matters further, may be related non-trivially to the factor under study, e.g. dying from cardiac arrest while suffering lung failure) is counted identically to death from the cause of interest. In others, patients who die for other reasons may be excluded from the study. Both approaches have issues, but the latter case is an example of a more ubiqituous phenomenon in survival studies (at least those pertaining to human patients): \emph{censoring}.
+The second point above emphasises the importance of an appropriate definition of starting time for interpreting survival times. Defining suitable end points can also present nuanced issues, particularly accounting for, for example, deaths due to competing risks. While this is studied extensively in the literature, in this work we assume a fairly simple modelling scenario with no patients removed from the dataset from external causes. One form of removal/missingness that we certainly do care about, however, is \emph{censoring}. 
 
 \subsection{Censoring}
-In the previous section, we discussed a particular (in fact, quite complex and nuanced), form of censoring, but other forms are more clear cut. Censoring in general refers to any consideration that means that we do not get to observe the patient until they die of the cause of interest. We therefore might think of the example above as `censoring by death from other cause'. Here are two further types of censoring:
+Censoring refers to non-observance of a given outcome (in this case, the death of a patient from the disease in question). In studies such as the ones we will discuss throughout this chapter, this is typically because the period of observation for the study ended. This is know as \emph{right}-censoring. Because we have not observed the event of interest, we only have acess to a one-sided interval in which the event would have happened. Addressing censoring is one of the core missions of survival analysis.
 
-\begin{enumerate}
-    \item `Censoring by continued survival'. This form of censoring is universal to human survival studies. In short: we cannot wait for everyone in a study to die, and we certainly can't force them to! At some point the study ends, and some participants may remain alive. We know (or suspect) that given enough time they would eventually die from the cause of interest, but all we know is that they survived at least as long as they had survived at the end of the study.
-    \item `Censoring by terminated participation'. This, broadly speaking, covers everything else. There are a variety of reasons patients may have to be removed from the cohort under observation during the progress of a study. These include medical non-compliance (e.g. refusing to take the treatment assigned to them), loss of follow-up (e.g. not responding to monthly requests for information), or reassignment due to some other protocol (e.g. being switched arms on a clinical trial for ethical reasons if it appears another treatment is clearly more beneficial).
-\end{enumerate}
-
-To address censoring, we use the following notation. For a patient $i$, we let $c_i \in \mathbb{R}^{+}$ (or $C_i$ for a random variable) denote the time at which the patient is removed from further observation. We therefore observe only the following: $y_i \in \mathbb{R}^{+}$ (or $Y_i$ for random variable) is the time of final follow-up, i.e. $y_i = \min(c_i, t_i)$; and $\delta_i$ (or $\Delta_i$) for censorship status, i.e. $\delta_i = \mathbbm{1}\{t_i \leq c_i\}$. 
+At this point we introduce some notation. For a patient $i$, we let $c_i \in \mathbb{R}^{+}$ (or $C_i$ for a random variable) denote the time at which the patient is removed from further observation. We therefore observe only the following: $y_i \in \mathbb{R}^{+}$ (or $Y_i$ for random variable) is the time of final follow-up, i.e. $y_i = \min(c_i, t_i)$; and $\delta_i$ (or $\Delta_i$) for censorship status, i.e. $\delta_i = \mathbbm{1}\{t_i \leq c_i\}$. 
 
 The core question for statistical modelling of survival is, therefore, how to make inferences about the behaviour of the random variables $T_i$ from observation only of a given set of $n$ pairs $\{(y_i, \delta_i)\}_{i=1}^{n}$. In general we assume these tuples of observations (and potential future observations) to be realisations of independent and identically distributed random variables, and so refer to this underlying joint distribution without reference to sample $i$, i.e. we consider ($T, C, \Delta)$.  We discuss in the next section some common practices for performing inference on these targets.
    
@@ -254,16 +249,26 @@ Without elaborating further on the asymptotic properties of the doubly robust es
 \subsection{Regularisation}
 Another view of the two heuristic extremes described in Section~\ref{sec:doublerobustness} is as a balance between  `information sharing' across the estimated conditional regression functions $\muhat_0$ and $\muhat_1$, and allowing them to be as flexible as possible in order to capture nuances to the difference between them (i.e. the treatment effect). \citet{shalit_estimating_2017} proposed a method based on representation learning, in which three functions are learned: $\Phi(x), h_0(x), h_1(x)$, such that $\muhat_a(x) := h_a(\Phi(x))$. In this way information is shared between $\muhat_0$ and $\muhat_1$ via the embedding $\Phi$. The strength of this sharing is determining by applying a regularisation term to the loss function when fitting all three functions simultaneously, which penalises distributional divergence between $\Phi(X) \ | \ A = 1$ and $\Phi(X)  \ | \ A = 0$. 
 
+We let $\tau_{\Phi, h_0, h_1}(x) := h_1(\Phi(x)) - h_0(\Phi(x))$ to refer to the estimate of \gls{cate} derived from these functions. Here we measure the success of this estimate with expected \emph{precision in estimation heterogeneous treatment effect}, as defined in \citet{hill_bayesian_2011} and used in \citet{shalit_estimating_2017}.
+\[
+\epsilon_{PEHE}(\Phi, h_0, h_1) :=  \int_{\mathcal{X}} \big(\hat{\tau}_{\Phi, h_0, h_1}(x) - \tau(x) \big)^2p(x) dx, 
+\]
+where $p(x)$ is the density of the variable $X$ over its domain $\mathcal{X}$. Here we assume that $\Phi \colon \mathcal{X} \rightarrow \mathcal{R}$ is a one-to-one twice differentiable function with image $\mathcal{R}$ and inverse $\Phi \colon \mathcal{R} \rightarrow \mathcal{X}$. We define $p_{\Phi}^{A=a}(r) := p_{\Phi}(r|A=a)$ to be the conditional density of the image $R = \Phi(X)$ under treatment $A=a$. 
+
+As mentioned above, our strategy will be to regularise the distributional distance between the distributions $R | A = 1$ and $R | A =0$. To do so, we will need an appropriate distance measure. For this, we employ the \gls{ipm} family. These are defined for two density functions $p$, $q$ over the domain $\mathcal{R}$. For a family $G$ of functions $g \colon \mathcal{R} \rightarrow \mathbb{R}$, we define 
+
+\[ \mathrm{IPM}_G(p,q) := \sup_{g \in G} \Big| \int_{\mathcal{R}} g(s)\big(p(s)-q(s)\big)ds\Big|.\]
+The \gls{ipm} metrics include, for an appropriate choice of function family $G$, the maximum mean discrepancy and the Wasserstein distance \citep{}
 \subsection{Causal forests}
-\citep{athey_generalized_2019}
+{\color{red} Summary of \citet{athey_generalized_2019}}
 
 \section{Heterogeneous treatment effects applied to survival analysis \label{sec:hte_survival}}
 
 \subsection{Forests again \label{sec:surv_hte_forests}}
-\citep{cui_estimating_2022}
+{\color{red} Summary of \citet{cui_estimating_2022}}
 
 \subsection{Regularisation again}
-\citep{chapfuwa_enabling_2021}
+{\color{red} Summary of \citet{chapfuwa_enabling_2021}}
 
 \section{Application to a combined immunotherapy dataset \label{sec:immuno_hte}}
 
@@ -282,23 +287,54 @@ We begin by investigating the extent to which the methods we've described for he
 
 We begin by applying the causal survival forests method of \citet{cui_estimating_2022}. To restrict the focus of this demonstrative application, we consider only \gls{nsclc} patients from each of the datasets described above. To simplify matters further, we consider only patients without missing data for time-to-event, censoring status, sex, or \gls{tmb} values, and where multiple samples are available for a given patient we take only the sample with the highest sequencing coverage. After these restrictions we are left with samples from 129 immunotherapy-treated patients, and 603 not treated with immunotherapy. We take 75\% of these samples (96 immunotherapy, 452 non-immunotherapy) as a training dataset. We apply causal survival forests to predict differences in probability of survival after two years, as described in Section~\ref{sec:surv_hte_forests}.
 
-We present out-of-bag predictions of difference in survival probability for each patient using this method in Figure~\ref{fig:immuno_train_samples_hte_predictions}. We see a substantial improvement in expected benefit from immunotherapy with increased \gls{tmb} at low \gls{bmr}, before a plateau at around 20mut/Mb. Sex, the only clinical covariate available across both datasets (more on this later), appears to play a role moderating the strength of dependence. Within this trend, female patients appeared to show more sensitivity to changes in \gls{tmb} than their male counterparts, but this effect is fairly weak. 
+We present out-of-bag predictions of difference in survival probability for each patient using this method in Figure~\ref{fig:immuno_train_samples_hte_predictions}. We see a substantial improvement in expected benefit from immunotherapy with increased \gls{tmb} at low \gls{bmr}, before a plateau at around 20mut/Mb. Sex, the only clinical covariate available across both datasets (more on this later), appears to play a role fairly independently from \gls{tmb}. Within this trend, male patients appear to be consistently benefiting more from immunotherapy across \gls{tmb} values.
 
 \begin{figure}[!tpb] 
 \centering
-\includegraphics[width=\textwidth]{figures/chapter4/immuno_train_samples_hte_predictions.png}
-\caption{Out-of-bag predictions of difference of probability of 2-year survival after treatment with immunotherapy for non-small cell lung cancer patients.  \label{fig:immuno_train_samples_hte_predictions}}
+\includegraphics[width=\textwidth]{figures/chapter4/immuno_train_samples_hte_predictions.png} 
+
+\caption{Out-of-bag CSF predictions of difference of probability of 1- and 2-year survival (left and right panels respectively) after treatment with immunotherapy for non-small cell lung cancer patients.  \label{fig:immuno_train_samples_hte_predictions}}
 \end{figure}
 
-Interestingly, while a strong dependence on \gls{tmb} is observed, the highest level of estimated benefit from immunotherapy is low, and indeed for the majority of patients with low \gls{tmb} we estimate negative benefit from immunotherapy treatment. We hypothesise that this is due to uncaptured differences in typical clinical features between the two datasets. As mentioned above, to perform this analysis we were only able to utilise clinical factors that were recorded across both studies. As a conglomeration of multiple studies itself, the \citet{zehir_mutational_2017} dataset in particular did not make available several pieces of data that would be expected to impact disease trajectories significantly. The two most important of these, which would certainly be necessary to strengthen any associations learned here, would be patient age, and disease stage. Systematic variation in either would be likely to impact the difference in average rate of two-year survival between the two data sources and skew overall estimation of immunotherapy benefit (even if the relationship with \gls{tmb} was accurately captured).
+\begin{figure}[!tpb] 
+\centering
+\includegraphics[width=\textwidth]{figures/chapter4/train_samples_nn_predictions.png} 
+
+\caption{CSA neural network predictions of difference of probability of 1- and 2-year survival (left and right panels respectively) after treatment with immunotherapy for non-small cell lung cancer patients. \label{fig:immuno_train_samples_nn_hte_predictions}}
+\end{figure}
+
+Interestingly, while a strong dependence on \gls{tmb} is observed, the highest level of estimated benefit from immunotherapy is fa
+fairly low, and indeed for the majority of patients with low \gls{tmb} we estimate negative benefit from immunotherapy treatment. We hypothesise that this is due to uncaptured differences in typical clinical features between the two datasets. As mentioned above, to perform this analysis we were only able to utilise clinical factors that were recorded across both studies. As a conglomeration of multiple studies itself, the \citet{zehir_mutational_2017} dataset in particular did not make available several pieces of data that would be expected to impact disease trajectories significantly. The two most important of these, which would certainly be necessary to strengthen any associations learned here, would be patient age, and disease stage. Systematic variation in either would be likely to impact the difference in average rate of two-year survival between the two data sources and skew overall estimation of immunotherapy benefit (even if the relationship with \gls{tmb} was accurately captured).
 
 
 {\color{red} Add the same as above, with the regularisation method.}
 
 \subsection{Exploring more general markers}
+In order to explore signatures of response depending on more than just on clinical factors and \gls{tmb}, we include nonsynonymous mutation counts for each gene in the MSK-IMPACT gene panel. This panel consists (unsurprisingly) of 341 gene targets. Some samples in the given datasets were profiled with more extensive gene panels, so we restricted our analysis only to the genes covered by all panels. We fitted causal survival forests based on these mutation counts, patient sex, and \gls{tmb}. We then computed variable importance measures for each covariate, with all non-zero values shown in Figure~\ref{fig:immuno_panel_variable_importance}. 
+
+\begin{figure}[!tpb] 
+\centering
+\includegraphics[width=\textwidth]{figures/chapter4/immuno_panel_variable_importance.png}
+\caption{Top $\sim$20 genomic and clinical predictors of heterogeneous survival treatment effect, alongside their estimated within-forest importance metrics.  \label{fig:immuno_panel_variable_importance}}
+\end{figure}
+
+We see that, while no individual gene target is of the predictive importance of \gls{tmb} or sex in this larger combined model, but several come close. These include several usual suspects such as \emph{TP53}, \emph{KRAS}, \emph{STK11}, and \emph{KEAP1}. In order to understand the relationship between a gene's influence on the causal survival forest model and its \gls{bmr}, we compared variable importance scores with total mutation counts across the training dataset for each gene in the MSK-IMPACT panel, with outputs shown in Figure~\ref{fig:immuno_importance_vs_rate_panel}. While we observe some anomalies, such as \emph{EGFR}, we do see broadly that all highly weighted genes are those with elevated mutation rate.
+
+\begin{figure}[!tpb] 
+\centering
+\includegraphics[width=\textwidth]{figures/chapter4/immuno_importance_vs_rate_panel.png}
+\caption{Total number of mutations observed in each gene target across the training set, vs  percentage of predictive importance in the resultant causal survival forest ascribed to each target (targets with importance $>0$ labelled).  \label{fig:immuno_importance_vs_rate_panel}}
+\end{figure}
+
+{\color{red} Add the same as above, with the regularisation method.}
+
 
 \section{Conclusions}
-
+{\color{red} \begin{itemize}
+    \item Restrictions working with few clinical variables
+    \item Difficulties in model validation
+    \item Difficulties in application
+\end{itemize}}
 
 \dobib % renders bibliography (only when compiling for chapter only)
 
