@@ -189,10 +189,12 @@ I'm going to keep adding to this list of sections that are broadly speaking read
         \2 1.2.1 The core relationships between genomics quantities (DNA, RNA, protein). Should give enough detail that when data types/specific datasets are introduced later on people will know where they fit into the bigger biology picture.
         \2 1.2.2 Motivating that molecular biology as a whole has been useful in medicine, with a particular focus on how its impacted cancer research.
         \2 1.2.3 Overview of common technologies in genomics. Should be enough that readers know what we're talking about in terms of targeted sequencing in Chapters 3 and 4, and to get enough of a grasp of PCR to understand what LAMP is trying to do and why it's different in Chapter 2.
-    \1 Section 2. This is obviously an entire chapter that will be fresh-ish for you. It's fairly well developed (hopefully). I don't see realistically making huge changes to the content, but it'd be great to get a sense of how undertandable it is with the introduction, and any more context that needs giving.
-    \1 Section 4. This is all getting thrown together very fast, and I think should be the next thing you read after finished intro sections and Chapter~2. At the moment it's basically got results for half of the methods I want to demo, with the other methods following a similar trajectory. 
-        \2 Sections 4.1-4.3. These outline all aspects of heterogeneous treatment effect estimation up to (but not yet including) survival outcomes. There's a reasonable amount of writing there but it'll need editing.
-        \2 4.5 This should now lay out the experiments I'm hoping to have in place for causal survival forests and regularisation based HTE estimation, with only causal survival forests so far in place.
+    \1 Section 2. Most comments are now assimilated, but still need to standardise the final models that get used.
+    \1 Section 3. Our paper. Not envisioning adding anything, code stuff now an appendix. Not sure I'll have time to make major changes.
+    \1 Section 4. Despite all being thrown together very fast, most of the key results should now be there.
+        \2 Sections 4.1-4.2. These outline all relevant aspects of survival analysis and heterogeneous treatment effect estimation. 
+        \2 This is survival + HTE combos. I've now included  section for regularisation strategy but not yet for causal forests. There's a reasonable amount of writing there but it'll need editing.
+        \2 4.5 This now includes the main results and analysis of the example immunotherapy use cases.
     % \1 Appendices. I think these are low priorities. Appendices A and B are for LAMP, Appendix C for TMB. I haven't fleshed them out, and think this might actually be a good task for the week after you leave in July. 
     %     \2 Appendix A: We have an R package for feature generation for LAMP, and I also want to talk about clever codey workflow management stuff I've done. 
     %     \2 Appendix B: Summary figures for Chapter 2 that don't make it into the main text. 
@@ -202,20 +204,16 @@ I'm going to keep adding to this list of sections that are broadly speaking read
 }
 
 \chapter{Introduction \label{chap:intro}}
-
 \subfile{chapters/chapter1}
 
 
-\chapter{Bayesian analysis for optimising the LAMP gene expression assay \label{chap:lamp_modelling}}
-
+\chapter{Bayesian analysis for optimising LAMP gene expression assays \label{chap:lamp_modelling}}
 \subfile{chapters/chapter2}
 
 \chapter{Data-driven design of targeted gene panels for estimating immunotherapy biomarkers \label{chap:tmb_estimation}}
-
 \subfile{chapters/chapter3}
 
 \chapter{Causal survival analysis in oncology\label{chap:causal_genomics}}
-
 \subfile{chapters/chapter4}
 
 \addcontentsline{toc}{chapter}{Bibliography}
