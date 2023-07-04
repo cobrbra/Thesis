@@ -30,7 +30,7 @@ At this point we introduce some notation. For a patient $i$, we let $c_i \in \ma
 
 Our general aim, therefore, is to perform inference about the behaviour of the random variables $T_i$ from observation only of a given set of $n$ pairs $\{(y_i, \delta_i)\}_{i=1}^{n}$. Here we assume that these tuples of observations (and potential future observations) are realisations of independent and identically distributed random variables, and so refer to this underlying joint distribution without reference to sample $i$, i.e. we may consider the joint variable ($T, C, \Delta)$.  We discuss in the next section some common practices for performing inference on these targets.
 
-\jbnote{Informative vs non-informative censoring}
+One further concept worth mentioning is that of \emph{informative} vs \emph{non-informative censoring}. In the latter, it is assumed that censoring is independent of survival time, given the covariates. Throughout this chapter, we assume we are considering non-informative censoring for simplicity, although some of the methods presented have mechanisms for adjusting for informative censoring (see for example the CSA-INFO method of \citealp{chapfuwa_enabling_2021}).
    
 \subsection{Modelling approaches} \label{sec:survival_modelling}
 We now describe some common approaches to statistical modelling of survival data. We begin by defining \textit{hazard}. While it is possible to characterise the distribution of survival times $T$ in a variety of ways, hazard is common as it is both interpretable and easy to work with. For the distribution $T$, we define hazard $h(t)$ as a function of time $t$ as the instantaneous rate of death at time $t$, given survival up until time $t$, via:
@@ -267,27 +267,34 @@ Without elaborating further on the asymptotic properties of the doubly robust es
 \end{figure}
 
 
-\subsection{Causal forests}
+\subsection{Causal forests} \label{sec:causal_forests}
 
-\jbnote{Describe random forests} Before we describe causal forests, which were developed and implemented as a specific instance of so-called `generalised random forests' \citep{athey_generalized_2019, athey_estimating_2019}, we first describe briefly the process behind fitting (or `growing') random forests in general. Random forests were introduced by \citet{breiman_random_2001} and have been in the standard repertoire of machine learning methods ever since, noted in particular for their strong out-of-the-box performance with little parameter tuning, even when applied to high-dimensional data. Here we'll describe the application of random forests to regression problems, although applications to classification problems proceed in a very similar fashion.
+Before we describe causal forests, which were developed and implemented as a specific instance of so-called `generalised random forests' \citep{athey_generalized_2019, athey_estimating_2019}, we first describe briefly the process behind fitting (or `growing') random forests in general. Random forests were introduced by \citet{breiman_random_2001} and have been in the standard repertoire of machine learning methods ever since, noted in particular for their strong out-of-the-box performance with little parameter tuning, even when applied to high-dimensional data. Here we'll discuss only the application of random forests to regression problems, although classification forests proceed in a very similar fashion.
 
-Random forest models are \emph{ensembles} (weighted combinations) of \emph{decision trees}. Decision trees rely on a recursive partition of the domain space (in our case \mathcal{X}) into rectangular subspaces known as `leaves'. Within each leaf, 
-
+Random forest models are \emph{ensembles} (weighted combinations) of \emph{decision trees}. Decision trees rely on a recursive partition of the domain space (in our case $\mathcal{X}$) into rectangular subspaces known as `leaves' (see Figure~\ref{fig:recursive} for a visual example). Within each leaf, a representative value is used as the regression output, typically the mean of all training sample output values within that leaf. Branching of the tree is determined by choosing a threshold at which to subdivide the covariate space. This is often chosen so as to minimise the resultant variance of the resultant within-branch training sample outputs. The set of candidate covariates on which to threshold is chosen out of a random subset whose size is a hyperparameter of the algorithm. Other hyperparameters determine how deep and wide a decision tree is allowed to grow. Random forests, as the name suggest, average over the predictions of many trees, each trained on a randomly selected subset of the training data. For a given number of trees $B$, each tree $b$ results in a partition function $L_b \colon \mathcal{X} \rightarrow 2^{\mathcal{X}}$ which, given a point $x \in \mathcal{X}$, maps to the leaf of the tree $b$ in which resides so that $x \in L_b(x)$. A prediction for a point $x$ on a given tree $b$ is given by the weighted average
+\[ \sum_{i=1}^{n} \frac{\mathbbm{1} \{X_i \in L_b(x), i \in \mathcal{S}_b\}Y_i}{|\{i \colon X_i \in L_b(x), i \in \mathcal{S}_b\}|},\]
+where $\mathcal{S}_b$ is the random subsample of the training set chosen for tree $b$. We can then say that a prediction from the entire random forest for a point $x$ is given by 
+\[\frac{1}{B}\sum_{b=1}^{B} \sum_{i=1}^{n} \frac{\mathbbm{1} \{X_i \in L_b(x), i \in \mathcal{S}_b\}Y_i}{|\{i \colon X_i \in L_b(x), i \in \mathcal{S}_b\}|} = \sum_{i=1}^{n} \alpha_i(x) Y_i, \]
+\[ \text{where} \ \alpha_i(x) := \frac{1}{B} \sum_{b=1}^B \frac{\mathbbm{1} \{X_i \in L_b(x), i \in \mathcal{S}_b\}Y_i}{|\{i \colon X_i \in L_b(x), i \in \mathcal{S}_b\}|}.\]
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{figures/chapter4/recursive.png}
-    \caption{Caption}
+    \caption{Example of a recursive partition of a space into `leaves' in two dimensions, reproduced from \citet{reeve_adaptive_2021}.}
     \label{fig:recursive}
 \end{figure}
 
-\jbnote{Redefine objective}
-Causal forests are inspired by the $R$-Learner approach of \citet{nie_learning_2017}. In this approach, first an estimate of the propensity $\pihat(x)$ and (marginal) regression function $\muhat(x)$ are fitted. These are combined to give 
+Causal forests, produced by an adaptation of the random forests algorithm, are inspired by the $R$-Learner approach of \citet{nie_learning_2017}. To motivate this approach we note that, under the standard causal assumptions,
+\begin{align*} 
+Y - \mu(X) & = Y^{(1)} + (1-A)Y^{(0)} - \pi(X)\bbE[Y^{(1)}|X] - (1-\pi(X))\bbE[Y^{(0)}|X]
+\\  
+& = AY^{(1)} + (1-A)Y^{(0)}- \bbE[Y^{(0)}|X] - \pi(X)\tau(X) \\
+& = A(Y^{(1)} - \bbE[Y^{(1)}|X]) + (1-A)(Y^{(0)}- \bbE[Y^{(0)}|X]) + (A-\pi(X))\tau(X) \\
+& = (Y - \bbE[Y|X,A]) + (A-\pi(X))\tau(X).
+\end{align*}
+Here the first term $(Y-\bbE[Y|X,A])$ is the intrinsic variation due to randomness in $Y$ after all controls. \citet{nie_learning_2017} therefore propose first estimating the propensity function $\pihat(x)$ and (marginal) regression function $\muhat(x)$. These are then combined into a target for optimisation, such that $\hat{\tau}$ is selected satisfying\footnote{The original authors also included a regularisation term, which we omit for simplicity.} 
+\[\hat{\tau} \in \argmin_{\tau} \Big\{\frac{1}{n}\sum_{i=1}^{n} \bigg( \big(y_i - \muhat(x_i)\big) - \big(a_i - \pihat(x_i)\big)\tau(x_i)\bigg)^2  \Big\}.\]
+To adapt this method to the regression forest setting, \citet{athey_generalized_2019} first fit forests for $\muhat$ and $\pihat$, and for each leaf select a constant value of $tau$ minimising the expression above for the relevant leaf/branch. To eliminate bias, at each point they replace $\muhat(x)$ and $\pihat(x)$ with their \emph{out-of-bag} estimates $\muhat^{(-i)}(x_i)$ and $\pihat^{(-i)}(x_i)$, where in the given regression forests only leaves not containing the given training sample are used for prediction\footnote{If not in the context of random forests, `out-of-bag' may equally be replaced by `out-of-fold' for cross-validated models.}.
 
-
-\jbnote{Describe out-of-bag alterations}
-
-
-\citep{athey_generalized_2019} \citep{athey_estimating_2019}
 
 \subsection{Regularisation} \label{sec:regularisation_hte}
 Another view of the two heuristic extremes described in Section~\ref{sec:doublerobustness} is as a balance between  `information sharing' across the estimated conditional regression functions $\muhat_0$ and $\muhat_1$, and allowing them to be as flexible as possible in order to capture nuances to the difference between them (i.e. the treatment effect). \citet{shalit_estimating_2017} proposed a method based on representation learning, in which three functions are learned: $\Phi(x), m_0(x), m_1(x)$, such that $\muhat_a(x) := m_a(\Phi(x))$. In this way information is shared between $\muhat_0$ and $\muhat_1$ via the embedding $\Phi$. The strength of this sharing is determining by applying a regularisation term to the loss function when fitting all three functions simultaneously, which penalises distributional divergence between $\Phi(X) \ | \ A = 1$ and $\Phi(X)  \ | \ A = 0$. 
@@ -327,12 +334,26 @@ Here $\alpha$ is now a tunable parameter to be optimised by (for example) cross-
 
 
 \section{Heterogeneous treatment effects applied to survival analysis \label{sec:hte_survival}}
+Having summarised several approaches and concepts for \gls{hte} estimation, we now turn to two specific (and very different) examples from recent literature on adapting estimation methods to the prediction of discrepancies in survival. These follow on from the last two examples from the previous section, namely causal forest and neural network-based distributional regularisation. As well as using different underlying methodologies, they produce starkly different outputs. Causal survival forests, like causal forests in general, learn only the target function $\hat{\tau}$, whereas the regularisation approach learns two distinct stochastic functions for survival outcomes. Notably, neither are based on a parametric statistical model for survival such as proportional hazards or accelerated failure time.
 
 \subsection{Forests again \label{sec:surv_hte_forests}}
-{\color{red} Summary of \citet{cui_estimating_2022}}
+\citet{cui_estimating_2022} propose \glspl{csf} for \gls{hte} estimation in the presence of censored data. Based on causal forests an implemented via the same R package \texttt{grf} \citep{tibshirani_grf_2023}, their first major contribution is to propose a weighting scheme similar to the \gls{ipw} approach introduced in Section~\ref{sec:metalearners}. They then proceed to describe a correction for double robustness under misspecification of the learned censoring function. This corrective term is too technically verbose to describe in full here, so having introduced the concept of double robustness at length in Section~\ref{sec:doublerobustness} we limit ourselves here to an outline of what is achieved by this correction.
+
+Firstly, we note that in most medical (or indeed any other) survival analyses, some maximum time horizon for uncensored data is often present. For example, in a clinical study spanning ten years, any time points greater than ten years must be censored. We may not, then, expect to be able to recover any meaningful treatment effect for this range of values. \citet{cui_estimating_2022} therefore introduce a \emph{time horizon} $h$, a deterministic transformation $\gamma$, and attempt to estimate an altered \gls{hte} funtion
+\[\tau^{\gamma, h}(x) := \bbE[\gamma(T^{(1)}, h) - \gamma(T^{(0)}, h) | x = x].\]
+Here the transformation $\gamma$ is restricted to satisfy $\gamma(t, h) \geq \gamma(h, h)$ for all $t \geq h>0$. The choice of the function $\gamma$ induces variations in the effect being measured, with $\gamma(t,h) = \min\{t,h\}$ inducing estimation of difference in \gls{rmst} and $\gamma(t,h) = \mathbbm{1}\{t \geq h \}$ inducing estimation of differences in survival probability. In our later analyses we investigate the application of \glspl{csf} to estimation heterogeneous effects on survival probabilities after one and two years.
+
+In its simplest form the method of \citet{cui_estimating_2022} draws inspiration from \gls{ipcw}, the core tenet of which is to first estimate the \emph{censoring function} 
+\[S_a^C(s|x) = \mathbb{P}(C \geq s | A = a, X = x).\]
+We refer to this estimate as $\hat{s}_a(t|x)$. We may do this using only censored data. We could then fit a causal forest for $\gamma(T, h)$. In the language introduced in Section~\ref{sec:causal_forests}, we could express this forest as a weighted sample-wise sum with weightings 
+\[\alpha_i(x)  = \frac{1}{B}\sum_{b=1}^B\frac{\mathbbm{1}\{X_i \in L_b(x), i \in \mathcal{S}_b\}}{|\{i: X_i \in L_b(x), i \in \mathcal{S}_b\}|}\}.\]
+We may then simply replace this weighting $\alpha_i(x)$ with $\alpha_i(x)/ \hat{s}_{A_i}(\gamma(T_i, h) | X_i)$. This has the effect of up-weighting observations which were observed but which were unlikely to have been observed, and has been shown empirically to be broadly successful in eliminating censoring bias \citep{van_der_laan_unified_2003}.
+
+While the \gls{ipcw} strategy may be a good baseline, it suffers from two key drawbacks: firstly, each of its censoring and treatment functions can only be learned on a subset of the available training data. Secondly, it is vulnerable to misspecification/poor fit of the censoring function $\hat{s}_a(t|x$). The solution proposed by \citet{cui_estimating_2022} entails the joint estimation of several more `nuisance' functions detailing different aspects of the censoring distribution. Taken together these are shown to provide double robustness -- an analogue to the double robustness demonstrated in Section~\ref{sec:doublerobustness}, taken here to mean robustness to either misspecification of the censoring function or misspecification of the propensity function.
+
 
 \subsection{Regularisation again \label{sec:surv_reg}}
-Our second example of a modern strategy for enabling survival \gls{hte} estimation returns to the distributional regularisation method proposed by \citet{shalit_estimating_2017} and discussed in Section~\ref{sec:regularisation_hte}. \citet{chapfuwa_enabling_2021} proposed an extension applicable to survival data that retains the same overall structure: learning a representation $\Phi \colon \mathcal{X} \rightarrow \mathcal{R}$ of input data $X$ taking values in $\mathcal{X}$ that serves to `share information' between two conditional regression functions defined by compositions of the representation function $\Phi$ with treatment-specific functions $m_0,m_1$. The same regularisation term, based on \glsfirst{ipm} families which include the Wasserstein distance, is used to force the learned representations $R=\Phi(X)$ to be distributionally similar regardless of the assigned treatment. 
+Our second example of a modern strategy for enabling survival \gls{hte} estimation returns to the distributional regularisation method proposed by \citet{shalit_estimating_2017} and discussed in Section~\ref{sec:regularisation_hte}. \citet{chapfuwa_enabling_2021} proposed an extension, \gls{csa}\footnote{They also provide a further extension, CSA-INFO, to deal with informative censoring; we omit this for simplicity.}, applicable to survival data that retains the same overall structure: learning a representation $\Phi \colon \mathcal{X} \rightarrow \mathcal{R}$ of input data $X$ taking values in $\mathcal{X}$ that serves to `share information' between two conditional regression functions defined by compositions of the representation function $\Phi$ with treatment-specific functions $m_0,m_1$. The same regularisation term, based on \glsfirst{ipm} families which include the Wasserstein distance, is used to force the learned representations $R=\Phi(X)$ to be distributionally similar regardless of the assigned treatment. 
 
 The required extension to survival analysis is provided by replacing the deterministic functions $m_0, m_1$ with flexible regression functions (in this case provided by neural networks) dependent on a separate random input $\varepsilon$. This allows for a non-parametric specification of the distribution of survival times, as described in Section~\ref{sec:nonparametric}. Again as described in the previous section, the adapted survival loss from \citet{chapfuwa_adversarial_2018}. We therefore arrive at a strategy defined by minimising the objective 
 \[\frac{1}{n}\sum_{i=1}^n w_i L(m_{a_i}(\Phi(x_i), \varepsilon), y_i, \delta_i) + \alpha \mathrm{IPM}_G\big(\{\Phi(x_i)\}_{i:a_i=0}, \{\Phi(x_i)\}_{i:a_i=1}\big),\]

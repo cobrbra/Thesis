@@ -92,6 +92,11 @@ colorlinks,linkcolor=black,citecolor=blue,urlcolor=blue,breaklinks = true
 \newacronym[plural = ANNs, firstplural = artificial neural networks]{ann}{ANN}{artificial neural network}
 \newacronym{vcf}{VCF}{variant called format}
 \newacronym{ipm}{IPM}{integral probability metric}
+\newacronym[plural = CSFs, firstplural = causal survival forests]{csf}{CSF}{causal survival forest}
+\newacronym{csa}{CSA}{counterfactual survival analysis}
+\newacronym{rmst}{RMST}{restricted mean survival time}
+\newacronym{ipcw}{IPCW}{inverse probability of censoring weighting}
+
 
 % \newglossaryentry{latex}
 % {
@@ -177,28 +182,16 @@ colorlinks,linkcolor=black,citecolor=blue,urlcolor=blue,breaklinks = true
 \tableofcontents
 ~\\
 {\color{red} FOR TIM:
-I'm going to keep adding to this list of sections that are broadly speaking ready to be read and for comments. If you find you've run out of stuff to read then just pop me a message and I'll point you to stuff that is essentially done but needs more attention.
+Summary of progress.
 \begin{outline}
     \1 Abstract. This should now be locked in, as we've included in when reaching out to examiners and in filing NITS.
     \1 Lay summary. I've tried to make this fairly fun and breezy. I'm guessing it's not the most important section in the world so have been pretty free with it, but let me know if it's not hitting the right tone.
-    \1 Section 1.1. This is a general overview of the type of content in the entire thesis (but not discussing any specifics of layout).
-        \2 1.1.0 Very general motivating questions for problems looked at across the thesis, and outline of the introduction chapter.
-        \2 1.1.1 Talking about what new types of genomics data are available and what problems in medicine they've been used to solve. First airtime for ideas like `subtyping' (motivation for Chapter 2) and `biomarkers to accompany therapy` (motivation for Chapter 3). Finish up with a mention of the difficulties combining disparate datasets (motivation for Chapter 4), and practical problems with the data (motivate the need for statistics and lead in to 1.1.2)
-        \2 1.1.2 Overview of statistical learning and machine learning. Bit of loose definition work talking about `prediction', `regression', `model fitting'. While ML is in the title of the thesis for cynical professional reasons, motivate why `can't we just use fancy ML stuff' isn't always/often an option with the data we're working with.
-    \1 Section 1.2 Biologial background necessary to understand what's going to happen in the rest of the thesis.
-        \2 1.2.1 The core relationships between genomics quantities (DNA, RNA, protein). Should give enough detail that when data types/specific datasets are introduced later on people will know where they fit into the bigger biology picture.
-        \2 1.2.2 Motivating that molecular biology as a whole has been useful in medicine, with a particular focus on how its impacted cancer research.
-        \2 1.2.3 Overview of common technologies in genomics. Should be enough that readers know what we're talking about in terms of targeted sequencing in Chapters 3 and 4, and to get enough of a grasp of PCR to understand what LAMP is trying to do and why it's different in Chapter 2.
+    \1 Section 1. Sections 1.0-1.2 complete (with some revisions left to integrate), sections 1.3-1.4 now current focus.
     \1 Section 2. Most comments are now assimilated, but still need to standardise the final models that get used.
     \1 Section 3. Our paper. Not envisioning adding anything, code stuff now an appendix. Not sure I'll have time to make major changes.
-    \1 Section 4. Despite all being thrown together very fast, most of the key results should now be there.
-        \2 Sections 4.1-4.2. These outline all relevant aspects of survival analysis and heterogeneous treatment effect estimation. 
-        \2 This is survival + HTE combos. I've now included  section for regularisation strategy but not yet for causal forests. There's a reasonable amount of writing there but it'll need editing.
-        \2 4.5 This now includes the main results and analysis of the example immunotherapy use cases.
-    % \1 Appendices. I think these are low priorities. Appendices A and B are for LAMP, Appendix C for TMB. I haven't fleshed them out, and think this might actually be a good task for the week after you leave in July. 
-    %     \2 Appendix A: We have an R package for feature generation for LAMP, and I also want to talk about clever codey workflow management stuff I've done. 
-    %     \2 Appendix B: Summary figures for Chapter 2 that don't make it into the main text. 
-    %     \2 Appendix C: This dicusses how the \texttt{ICBioMark} package is used. I did experiment with putting it in its own section in the chapter, but somehow it felt more at home in methods. Eventually after I decided there was enough to say about LAMP code to have an appendix, I decided to give it its own. Let me know what you think.
+    \1 Section 4. This should now be ready to read through! (Some finishing off to do in conclusions).
+    \1 Appendices. Low priority. Am going to write while you're away (/potentially while I'm away).
+    
     
 \end{outline}
 }
