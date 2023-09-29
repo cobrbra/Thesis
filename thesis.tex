@@ -3,6 +3,9 @@
 \usepackage[phd]{edmaths}
 \usepackage[T1]{fontenc}
 
+\usepackage{soul}
+
+
 % Title page meta-data 
 \title{
 Statistical and Machine Learning Approaches to Genomic Medicine \vspace{100pt} \\ 
@@ -85,7 +88,7 @@ colorlinks,linkcolor=black,citecolor=blue,urlcolor=blue,breaklinks = true
 \newacronym[plural = HTEs, firstplural = heterogeneous treatment effects]{hte}{HTE}{heterogeneous treatment effect}
 \newacronym[plural = ATEs, firstplural = average treatment effects]{ate}{ATE}{average treatment effect}
 \newacronym{pgm}{PGM}{probabilistic graphical model}
-\newacronym{iqr}{IQR}{inter-quartile range}
+\newacronym{iqr}{IQR}{interquartile range}
 \newacronym{mskcc}{MSKCC}{the memorial Sloan Kettering cancer centre}
 \newacronym{pfs}{PFS}{progression-free survival}
 \newacronym{rct}{RCT}{randomised controlled trial}
@@ -96,6 +99,8 @@ colorlinks,linkcolor=black,citecolor=blue,urlcolor=blue,breaklinks = true
 \newacronym{csa}{CSA}{counterfactual survival analysis}
 \newacronym{rmst}{RMST}{restricted mean survival time}
 \newacronym{ipcw}{IPCW}{inverse probability of censoring weighting}
+\newacronym{sdr}{SDR}{sufficient dimension reduction}
+\newacronym{mle}{MLE}{maximum likelihood estimation}
 
 
 % \newglossaryentry{latex}
@@ -160,7 +165,7 @@ colorlinks,linkcolor=black,citecolor=blue,urlcolor=blue,breaklinks = true
 
 \begin{document}
 \def\dobib{} % Disable chapter-specific bibliographies
-\lstset{showstringspaces=false,language=R} % inline code settings
+\lstset{showstringspaces=false} % inline code settings
 
 \maketitle
 
@@ -173,28 +178,19 @@ colorlinks,linkcolor=black,citecolor=blue,urlcolor=blue,breaklinks = true
 \chapter*{Lay Summary}
 \label{chap:laysummary}
 \addcontentsline{toc}{chapter}{\nameref{chap:laysummary}}
-
 \subfile{chapters/laysummary}
+
+
+\chapter*{Foreword}
+\label{chap:foreword}
+\addcontentsline{toc}{chapter}{\nameref{chap:foreword}}
+\subfile{chapters/foreword}
 
 % \printglossary % LINDEN UNCOMMENT
 \printglossary[type=\acronymtype]
 
 \tableofcontents
-~\\
-{\color{red} FOR TIM:
-Summary of progress.
-\begin{outline}
-    \1 Abstract. This should now be locked in, as we've included in when reaching out to examiners and in filing NITS.
-    \1 Lay summary. I've tried to make this fairly fun and breezy. I'm guessing it's not the most important section in the world so have been pretty free with it, but let me know if it's not hitting the right tone.
-    \1 Section 1. Sections 1.0-1.2 complete (with some revisions left to integrate), sections 1.3-1.4 now current focus.
-    \1 Section 2. Most comments are now assimilated, but still need to standardise the final models that get used.
-    \1 Section 3. Our paper. Not envisioning adding anything, code stuff now an appendix. Not sure I'll have time to make major changes.
-    \1 Section 4. This should now be ready to read through! (Some finishing off to do in conclusions).
-    \1 Appendices. Low priority. Am going to write while you're away (/potentially while I'm away).
-    
-    
-\end{outline}
-}
+
 
 \chapter{Introduction \label{chap:intro}}
 \subfile{chapters/chapter1}
@@ -216,12 +212,14 @@ Summary of progress.
 \appendix
 
 \chapter{Computational workflow for LAMP assay analysis}
+\label{appchap:lamp_code}
 \subfile{chapters/appendix1}
 
-\chapter{Extened model summaries for LAMP assay analysis}
+\chapter{Extended model summaries for LAMP assay analysis}
+\label{appchap:lamp_models}
 \subfile{chapters/appendix2}
 
-\chapter{Open-source software accompanying TMB estimation}
+\chapter{Open-source software accompanying TMB estimation} \label{appchap:tmb}
 \subfile{chapters/appendix3}
 
 \end{document}
